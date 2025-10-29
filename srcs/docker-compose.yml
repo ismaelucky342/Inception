@@ -1,0 +1,32 @@
+# ... (dentro de srcs/docker-compose.yml)
+services:
+  nginx:
+    # ... build, ports (443:443)
+    networks:
+      - inception_network
+
+  wordpress:
+    # ... build, environment
+    networks:
+      - inception_network
+
+  mariadb:
+    # ... build, environment, volumes
+    networks:
+      - inception_network
+
+networks:
+  inception_network:
+    driver: bridge
+
+volumes:
+  # Los dos volúmenes requeridos
+  mariadb_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/login/data/mariadb # Asegúrate de que esta ruta existe en tu MV
+  wordpress_files:
+    driver: local
+    # ... (similar a mariadb_data)
