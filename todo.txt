@@ -1,0 +1,30 @@
+MANDATORY
+- Create srcs/requirements/nginx/Dockerfile with Nginx, TLSv1.2/1.3, HTTPS reverse proxy.
+- Create srcs/requirements/wordpress/Dockerfile with WordPress + PHP-FPM only.
+- Complete srcs/docker-compose.yml with services nginx, wordpress, mariadb.
+- Use build paths and image names matching service names.
+- Set restart policy for all containers (e.g. unless-stopped/always).
+- Configure a custom Docker network and reference it in each service.
+- Expose only port 443 on nginx.
+- Define two named volumes: one for MariaDB data, one for WordPress files.
+- Ensure volumes map to /home/<login>/data on the host, replacing login with your username.
+- Add environment variables in srcs/.env for database and WordPress configuration.
+- Avoid using latest image tags and avoid pulling ready-made service images.
+- Use Docker named volumes, not bind mounts, for persistent storage.
+- Ensure nginx is the only entry point through port 443.
+- Do not use network: host, links, or --link.
+- Do not run hacky infinite-loop commands in entrypoint or command.
+- Replace DOMAIN_NAME and WP_ADMIN_USER with valid real values.
+- Add a secrets directory and move confidential values there if using Docker secrets.
+- Create USER_DOC.md describing service access, startup/shutdown, usage, credentials, and health checks.
+- Create DEV_DOC.md describing setup, build/launch commands, container/volume management, and data persistence.
+- Update README.md to meet 42 requirements: italic first line, Description, Instructions, Resources, and required comparisons.
+
+BONUS
+- Add an Adminer service with its own Dockerfile and compose definition.
+- Add a Redis service with its own Dockerfile and configure WordPress cache support.
+- Add an FTP service with its own Dockerfile pointing to the WordPress files volume.
+- Add a static website service in a language other than PHP.
+- Add one extra useful service with its own Dockerfile if desired.
+- Expose ports for bonus services as needed, while keeping nginx as the mandatory HTTPS entry point.
+- Ensure any bonus services are only added after the mandatory part works perfectly.
