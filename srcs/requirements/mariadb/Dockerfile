@@ -1,23 +1,13 @@
-# Usa una imagen base de Debian estable (como requiere el proyecto)
-FROM debian:bookworm-slim
+FROM alpine:3.18
 
-# Instala MariaDB y wget (para descargar dependencias si fuera necesario)
-RUN apt-get update && apt-get install -y mariadb-server \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache mariadb mariadb-client
 
-# Copia el script de inicialización y lo hace ejecutable
-COPY tools/init.sh /usr/local/bin/
+COPY tools/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
-# Especifica dónde estará la base de datos (para el volumen)
-RUN mkdir -p /var/lib/mysql
+RUN mkdir -p /var/lib/mysql && chown -R mysql:mysql /var/lib/mysql
 
-# CMD se ejecuta si no hay un ENTRYPOINT o si el ENTRYPOINT es solo un script
-# Usaremos nuestro script init.sh como ENTRYPOINT y luego el comando del daemon.
 ENTRYPOINT ["/usr/local/bin/init.sh"]
+CMD ["/usr/bin/mysqld", "--user=mysql", "--datadir=/var/lib/mysql"]
 
-# El comando final para que el contenedor permanezca vivo
-CMD ["/usr/sbin/mysqld"]
-
-# Puerto interno de MariaDB
 EXPOSE 3306

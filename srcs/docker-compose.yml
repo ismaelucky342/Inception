@@ -1,32 +1,87 @@
-# ... (dentro de srcs/docker-compose.yml)
+# srcs/docker-compose.yml
+
+version: '3.8'
+
+# ── Secrets ──────────────────────────────────────────────
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
+
 services:
-  nginx:
-    # ... build, ports (443:443)
-    networks:
-      - inception_network
 
-  wordpress:
-    # ... build, environment
-    networks:
-      - inception_network
-
+  # ── 1. MariaDB ──────────────────────────────────────────
   mariadb:
-    # ... build, environment, volumes
+    build: ./requirements/mariadb
+    container_name: mariadb
+    image: mariadb
+    restart: on-failure
+    env_file: .env
+    secrets:
+      - db_password
+      - db_root_password
+    volumes:
+      - db_data:/var/lib/mysql
     networks:
-      - inception_network
+      - inception
+    expose:
+      - "3306"
 
-networks:
-  inception_network:
-    driver: bridge
+  # ── 2. WordPress + PHP-FPM ──────────────────────────────
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress
+    image: wordpress
+    restart: on-failure
+    env_file: .env
+    depends_on:
+      - mariadb
+    secrets:
+      - db_password
+      - credentials
+    volumes:
+      - wp_data:/var/www/html
+    networks:
+      - inception
+    expose:
+      - "9000"
 
+  # ── 3. NGINX ────────────────────────────────────────────
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    image: nginx
+    restart: on-failure
+    env_file: .env
+    depends_on:
+      - wordpress
+    volumes:
+      - wp_data:/var/www/html
+    networks:
+      - inception
+    ports:
+      - "443:443"
+
+# ── Volúmenes nombrados ──────────────────────────────────
 volumes:
-  # Los dos volúmenes requeridos
-  mariadb_data:
+  db_data:
     driver: local
     driver_opts:
-      o: bind
       type: none
-      device: /home/login/data/mariadb # Asegúrate de que esta ruta existe en tu MV
-  wordpress_files:
+      o: bind
+      device: /home/ismherna/data/mysql
+
+  wp_data:
     driver: local
-    # ... (similar a mariadb_data)
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ismherna/data/wordpress
+
+# ── Red interna ──────────────────────────────────────────
+networks:
+  inception:
+    driver: bridge
