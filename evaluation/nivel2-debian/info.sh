@@ -1,0 +1,45 @@
+#!/bin/bash
+#!/bin/bash
+RED='\033[1;31m' # Rojo brillante oficial de Debian
+NC='\033[0m'
+
+echo "=============================================="
+echo "    Bienvenido al contenedor Debian GNU/Linux "
+echo "=============================================="
+echo -e "${RED}             _,met\$\$\$\$\$gg.          ${NC}"
+echo -e "${RED}           ,g\$\$\$\$\$\$\$\$\$\$\$\$\$\$\$P.       ${NC}"
+echo -e "${RED}         ,g\$\$\$\$P\"\"       \"\"\"Y\$\$.\".    ${NC}"
+echo -e "${RED}        ,\$\$\$P'              \`\$\$\$.     ${NC}"
+echo -e "${RED}      ',\$\$\$P       ,ggs.     \`\$\$\$b:   ${NC}"
+echo -e "${RED}      \`d\$\$'     ,\$P\"'   .    \$\$\$    ${NC}"
+echo -e "${RED}       \$\$P      d\$'     ,    \$\$P    ${NC}"
+echo -e "${RED}       \$\$:      \$\$.   -    ,d\$\$'    ${NC}"
+echo -e "${RED}       \$\$;      Y\$b._   _,d\$P'      ${NC}"
+echo -e "${RED}       Y\$\$.    \`.\`\"Y\$\$\$\$P\"'          ${NC}"
+echo -e "${RED}       \`\$\$\$b      \"-.__               ${NC}"
+echo -e "${RED}        \`Y\$\$\$b                        ${NC}"
+echo -e "${RED}         \`Y\$\$.                        ${NC}"
+echo -e "${RED}           \`\$\$\$b.                     ${NC}"
+echo -e "${RED}             \`Y\$\$\$b.                  ${NC}"
+echo -e "${RED}               \`\"Y\$b._                ${NC}"
+echo -e "${RED}                   \`\"\"\"\"_             ${NC}"
+echo "                          "
+echo "=============================================="
+echo ""
+echo ""
+echo "Sistema operativo:"
+cat /etc/os-release | grep PRETTY_NAME
+echo ""
+echo "Variables de entorno:"
+echo "  APP_ENV     = $APP_ENV"
+echo "  APP_VERSION = $APP_VERSION"
+echo ""
+echo "Kernel del host (compartido con host):"
+uname -r
+echo ""
+echo "Procesos actuales dentro del contenedor:"
+ps aux
+echo ""
+echo "Interfaces de red del contenedor:"
+ip addr show 2>/dev/null || ifconfig 2>/dev/null || echo "Sin herramientas de red"
+echo "============================================"

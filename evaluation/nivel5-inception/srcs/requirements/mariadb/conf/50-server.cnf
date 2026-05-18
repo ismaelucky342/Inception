@@ -1,0 +1,29 @@
+# /etc/mysql/mariadb.conf.d/50-server.cnf
+# Configuración de MariaDB para Inception
+
+[mysqld]
+# Escuchar en todas las interfaces (necesario para conexiones desde otros contenedores)
+bind-address            = 0.0.0.0
+
+# Puerto estándar de MySQL/MariaDB
+port                    = 3306
+
+# Directorio de datos
+datadir                 = /var/lib/mysql
+
+# Socket para conexiones locales
+socket                  = /run/mysqld/mysqld.sock
+
+# Usuario que ejecuta el proceso
+user                    = mysql
+
+# Logs de errores
+log_error               = /var/log/mysql/error.log
+
+# Charset por defecto (utf8mb4 soporta emojis y caracteres especiales)
+character-set-server    = utf8mb4
+collation-server        = utf8mb4_unicode_ci
+
+[client-server]
+# El cliente también usa el socket
+socket                  = /run/mysqld/mysqld.sock

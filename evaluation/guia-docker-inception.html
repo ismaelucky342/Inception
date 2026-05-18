@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Guide — Inception 42</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #0f1629;
+    --card: #141c30;
+    --border: #1e2d4a;
+    --accent: #4f9cf9;
+    --accent2: #7c5ff0;
+    --green: #3de88a;
+    --amber: #f0a832;
+    --red: #f05252;
+    --text: #c8d8f0;
+    --text2: #6888aa;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Space Grotesk', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .whale {
+    font-size: 2rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  header span {
+    font-size: 0.8rem;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 73px);
+  }
+
+  /* ── Sidebar ── */
+  nav {
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 73px;
+    height: calc(100vh - 73px);
+    overflow-y: auto;
+  }
+
+  .nav-section {
+    padding: 0.4rem 1rem 0.2rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text2);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    font-size: 0.88rem;
+    color: var(--text2);
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active {
+    background: var(--surface);
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Main ── */
+  main {
+    padding: 2rem;
+    max-width: 900px;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .level-badge {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  .page-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .page-header p {
+    color: var(--text2);
+    font-size: 0.92rem;
+    margin-top: 0.4rem;
+    line-height: 1.6;
+  }
+
+  /* ── Cards ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+  }
+
+  .card h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+    margin-bottom: 0.8rem;
+  }
+
+  .card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .card li {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .card li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1rem 0;
+    font-size: 0.82rem;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text2);
+  }
+
+  .code-filename {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+
+  pre {
+    padding: 1.2rem;
+    overflow-x: auto;
+    line-height: 1.7;
+    font-family: var(--mono);
+  }
+
+  .comment { color: #4a6a8a; }
+  .keyword { color: #7c5ff0; }
+  .string  { color: #3de88a; }
+  .cmd     { color: #f0a832; }
+  .flag    { color: #f05252; }
+  .normal  { color: var(--text); }
+
+  /* ── Diagram ── */
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  .d-box {
+    display: inline-block;
+    border: 1px solid;
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+  }
+  .d-blue   { border-color: var(--accent);  color: var(--accent); }
+  .d-purple { border-color: var(--accent2); color: var(--accent2); }
+  .d-green  { border-color: var(--green);   color: var(--green); }
+  .d-amber  { border-color: var(--amber);   color: var(--amber); }
+  .d-red    { border-color: var(--red);     color: var(--red); }
+  .d-arrow  { color: var(--text2); }
+
+  /* ── Alert / tip ── */
+  .tip {
+    display: flex;
+    gap: 0.8rem;
+    background: rgba(79, 156, 249, 0.07);
+    border: 1px solid rgba(79, 156, 249, 0.25);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.87rem;
+    line-height: 1.6;
+  }
+
+  .warn {
+    background: rgba(240, 168, 50, 0.07);
+    border-color: rgba(240, 168, 50, 0.3);
+  }
+
+  .danger {
+    background: rgba(240, 82, 82, 0.07);
+    border-color: rgba(240, 82, 82, 0.3);
+  }
+
+  .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Service diagram (Inception) ── */
+  .stack-diagram {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .service-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .service-name {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .service-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+
+  .tag.highlight { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Volumes diagram ── */
+  .vol-diagram {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+  }
+
+  .vol-box {
+    flex: 1;
+    min-width: 180px;
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .vol-title {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 0.6rem;
+  }
+
+  .vol-item {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text2);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .vol-item:last-child { border-bottom: none; }
+
+  /* ── Rules list ── */
+  .rules {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 1rem 0;
+  }
+
+  .rules li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+    font-size: 0.87rem;
+    line-height: 1.5;
+  }
+
+  .rules li .r-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="whale">🐳</div>
+  <div>
+    <h1>Docker Inception Guide</h1>
+    <span>42 — de cero hasta el stack final</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav>
+    <div class="nav-section">Fundamentos</div>
+    <div class="nav-item active" onclick="show('n1')" id="nav-n1">
+      <div class="nav-dot" style="background:#6888aa"></div> N1 — hello-world
+    </div>
+
+    <div class="nav-section" style="margin-top:0.5rem">Sistema base</div>
+    <div class="nav-item" onclick="show('n2a')" id="nav-n2a">
+      <div class="nav-dot" style="background:#3de88a"></div> N2 — Alpine
+    </div>
+    <div class="nav-item" onclick="show('n2b')" id="nav-n2b">
+      <div class="nav-dot" style="background:#3de88a"></div> N2 — Debian
+    </div>
+    <div class="nav-item" onclick="show('n2c')" id="nav-n2c">
+      <div class="nav-dot" style="background:#1793d1"></div> N2 — Arch Linux
+    </div>
+
+    <div class="nav-section" style="margin-top:0.5rem">Procesos</div>
+    <div class="nav-item" onclick="show('n3a')" id="nav-n3a">
+      <div class="nav-dot" style="background:#4f9cf9"></div> N3 — Python HTTP
+    </div>
+    <div class="nav-item" onclick="show('n3b')" id="nav-n3b">
+      <div class="nav-dot" style="background:#4f9cf9"></div> N3 — Nginx static
+    </div>
+
+    <div class="nav-section" style="margin-top:0.5rem">Datos y red</div>
+    <div class="nav-item" onclick="show('n4a')" id="nav-n4a">
+      <div class="nav-dot" style="background:#7c5ff0"></div> N4 — MySQL
+    </div>
+    <div class="nav-item" onclick="show('n4b')" id="nav-n4b">
+      <div class="nav-dot" style="background:#7c5ff0"></div> N4 — Redes y volúmenes
+    </div>
+
+    <div class="nav-section" style="margin-top:0.5rem">Inception 42</div>
+    <div class="nav-item" onclick="show('n5')" id="nav-n5">
+      <div class="nav-dot" style="background:#f0a832"></div> N5 — Stack completo
+    </div>
+    <div class="nav-item" onclick="show('reglas')" id="nav-reglas">
+      <div class="nav-dot" style="background:#f05252"></div> Reglas 42
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+
+    <!-- N1 -->
+    <div class="page active" id="n1">
+      <div class="page-header">
+        <div>
+          <span class="level-badge" style="background:#1a2030;color:#6888aa;border:1px solid #2a3a50">NIVEL 1</span>
+        </div>
+        <div>
+          <h2>hello-world</h2>
+          <p>¿Qué es una imagen? ¿Qué es un contenedor? Ciclo de vida mínimo: build → run → exit.</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Conceptos</h3>
+          <ul>
+            <li>Imagen = plantilla de solo lectura</li>
+            <li>Contenedor = proceso aislado</li>
+            <li>Layer = cada instrucción RUN/COPY</li>
+            <li>FROM scratch = vacío absoluto</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Comandos</h3>
+          <ul>
+            <li>docker build -t nombre .</li>
+            <li>docker run --rm nombre</li>
+            <li>docker images</li>
+            <li>docker history nombre</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel1/</span>
+        </div>
+        <pre><span class="comment"># FROM scratch = imagen vacía total (0 bytes base)</span>
+<span class="keyword">FROM</span> <span class="string">busybox:latest</span>
+
+<span class="keyword">LABEL</span> <span class="normal">maintainer</span>=<span class="string">"tu_login@student.42.fr"</span>
+
+<span class="comment"># CMD: proceso ejecutado al hacer docker run</span>
+<span class="comment"># El contenedor sale (exit 0) cuando CMD termina</span>
+<span class="keyword">CMD</span> [<span class="string">"echo"</span>, <span class="string">"Hola desde mi primer contenedor!"</span>]</pre>
+      </div>
+
+      <div class="diagram">
+        <div><span class="d-arrow">$ docker build -t mi-hello .</span></div>
+        <div><span class="d-arrow">         ↓</span></div>
+        <div><span class="d-box d-blue">FROM busybox</span> <span class="d-arrow">→ descarga layer base</span></div>
+        <div><span class="d-box d-blue">LABEL</span> <span class="d-arrow">→ metadata (no crea layer)</span></div>
+        <div><span class="d-box d-blue">CMD</span> <span class="d-arrow">→ comando por defecto</span></div>
+        <div><span class="d-arrow">         ↓</span></div>
+        <div><span class="d-arrow">$ docker run --rm mi-hello</span></div>
+        <div><span class="d-arrow">         ↓</span></div>
+        <div><span class="d-box d-green">Hola desde mi primer contenedor!</span> <span class="d-arrow">→ exit 0 → contenedor destruido</span></div>
+      </div>
+    </div>
+
+    <!-- N2A Alpine -->
+    <div class="page" id="n2a">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#0d2010;color:#3de88a;border:1px solid #1a4020">NIVEL 2</span></div>
+        <div>
+          <h2>Alpine Linux</h2>
+          <p>Sistema base minimalista (~5MB). Aprende <code>apk</code>, <code>ENV</code>, <code>RUN</code>, layers y la diferencia entre imagen y contenedor.</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Alpine vs Debian</h3>
+          <ul>
+            <li>Alpine: ~5MB, usa musl libc</li>
+            <li>Debian: ~70MB, compatible total</li>
+            <li>Alpine usa apk (no apt)</li>
+            <li>Ambas válidas en Inception 42</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Nuevas instrucciones</h3>
+          <ul>
+            <li>ENV = variable en build Y runtime</li>
+            <li>ARG = solo en build</li>
+            <li>WORKDIR = mkdir + cd</li>
+            <li>COPY = copia host → imagen</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel2-alpine/</span>
+        </div>
+        <pre><span class="keyword">FROM</span> <span class="string">alpine:3.19</span>
+
+<span class="comment"># ENV persiste en la imagen (visible con docker inspect)</span>
+<span class="keyword">ENV</span> <span class="normal">MI_VARIABLE</span>=<span class="string">"hola_42"</span>
+
+<span class="comment"># RUN: se ejecuta en BUILD, crea un layer</span>
+<span class="comment"># && encadena y limpiar caché reduce tamaño final</span>
+<span class="keyword">RUN</span> <span class="cmd">apk update</span> && \
+    <span class="cmd">apk add --no-cache bash curl wget vim</span> \
+    && <span class="cmd">rm -rf /var/cache/apk/*</span>
+
+<span class="keyword">WORKDIR</span> <span class="string">/app</span>
+<span class="keyword">COPY</span> <span class="normal">info.sh /app/info.sh</span>
+<span class="keyword">RUN</span> <span class="cmd">chmod +x /app/info.sh</span>
+
+<span class="keyword">CMD</span> [<span class="string">"/bin/bash"</span>, <span class="string">"/app/info.sh"</span>]</pre>
+      </div>
+
+      <div class="tip">
+        <div class="tip-icon">💡</div>
+        <div>Cada instrucción <code>RUN</code> crea un layer nuevo. Encadenar comandos con <code>&&</code> y limpiar la caché en el mismo <code>RUN</code> reduce el tamaño de la imagen final.</div>
+      </div>
+    </div>
+
+    <!-- N2B Debian -->
+    <div class="page" id="n2b">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#0d2010;color:#3de88a;border:1px solid #1a4020">NIVEL 2</span></div>
+        <div>
+          <h2>Debian Bullseye</h2>
+          <p>La base que usarás en Inception. Aprende <code>apt-get</code>, <code>ARG</code> vs <code>ENV</code> y <code>DEBIAN_FRONTEND=noninteractive</code>.</p>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel2-debian/</span>
+        </div>
+        <pre><span class="comment"># Inception 42: usa debian:bullseye (penúltima estable)</span>
+<span class="keyword">FROM</span> <span class="string">debian:bullseye</span>
+
+<span class="comment"># ARG: solo en build (no persiste en imagen)</span>
+<span class="keyword">ARG</span> <span class="normal">VERSION</span>=<span class="string">"1.0"</span>
+
+<span class="comment"># ENV: persiste en runtime</span>
+<span class="keyword">ENV</span> <span class="normal">APP_VERSION</span>=<span class="string">$VERSION</span>
+
+<span class="comment"># DEBIAN_FRONTEND=noninteractive: sin prompts en apt</span>
+<span class="keyword">RUN</span> <span class="cmd">apt-get update</span> && \
+    <span class="cmd">DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        --no-install-recommends \
+        bash curl wget</span> \
+    && <span class="cmd">apt-get clean</span> \
+    && <span class="cmd">rm -rf /var/lib/apt/lists/*</span>
+
+<span class="keyword">WORKDIR</span> <span class="string">/app</span>
+<span class="keyword">COPY</span> <span class="normal">info.sh /app/info.sh</span>
+<span class="keyword">CMD</span> [<span class="string">"/bin/bash"</span>, <span class="string">"/app/info.sh"</span>]</pre>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>ARG vs ENV</h3>
+          <ul>
+            <li>ARG: solo existe en build</li>
+            <li>ENV: persiste en imagen final</li>
+            <li>ARG para versiones, fechas</li>
+            <li>ENV para config de runtime</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>apt limpieza</h3>
+          <ul>
+            <li>apt-get clean → borra .deb</li>
+            <li>rm /var/lib/apt/lists/* → borra índices</li>
+            <li>--no-install-recommends → sin extras</li>
+            <li>Ahorra 30-50MB por imagen</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- N2C Arch -->
+    <div class="page" id="n2c">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#041824;color:#1793d1;border:1px solid #0a4060">NIVEL 2</span></div>
+        <div>
+          <h2>Arch Linux</h2>
+          <p>Rolling release, <code>pacman</code>, glibc, filosofía KISS. Solo educativo — Arch no está permitida en Inception 42, pero es perfecta para entender las diferencias entre distros.</p>
+        </div>
+      </div>
+
+      <div class="tip warn">
+        <div class="tip-icon">⚠️</div>
+        <div><strong>No válida para Inception 42.</strong> El subject exige <code>debian:bullseye</code> o <code>alpine</code>. Este nivel existe para comparar gestores de paquetes y entender por qué Debian es la elección correcta para el proyecto.</div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Diferencias clave</h3>
+          <ul>
+            <li>~140MB base (vs 5MB Alpine)</li>
+            <li>Rolling release: sin versión fija</li>
+            <li>glibc: máxima compatibilidad</li>
+            <li>pacman: rápido, sin sub-comandos</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>musl vs glibc</h3>
+          <ul>
+            <li>Alpine usa musl: ligero, menos compat.</li>
+            <li>Arch y Debian usan glibc</li>
+            <li>php-fpm, mysql necesitan glibc</li>
+            <li>Por eso Inception usa Debian, no Alpine</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel2-arch/</span>
+        </div>
+        <pre><span class="comment"># archlinux:base = ~140MB, rolling release, glibc</span>
+<span class="keyword">FROM</span> <span class="string">archlinux:base</span>
+
+<span class="keyword">ENV</span> <span class="normal">MI_VARIABLE</span>=<span class="string">"hola_42"</span>
+<span class="keyword">ENV</span> <span class="normal">OTRA_VAR</span>=<span class="string">"arch_btw"</span>
+
+<span class="comment"># pacman -Syu: update BD + upgrade SIEMPRE juntos</span>
+<span class="comment"># Nunca solo -Sy (rompe dependencias en rolling)</span>
+<span class="comment"># --noconfirm = equivalente a -y en apt-get</span>
+<span class="keyword">RUN</span> <span class="cmd">pacman -Syu --noconfirm</span> && \
+    <span class="cmd">pacman -S --noconfirm --needed \
+        bash curl wget vim</span> \
+    && <span class="cmd">pacman -Scc --noconfirm</span>
+<span class="comment">#          ^^^^</span>
+<span class="comment">#          Limpia caché de pacman (paquetes + BD)</span>
+
+<span class="keyword">WORKDIR</span> <span class="string">/app</span>
+<span class="keyword">COPY</span> <span class="normal">info.sh /app/info.sh</span>
+<span class="keyword">RUN</span>  <span class="cmd">chmod +x /app/info.sh</span>
+<span class="keyword">CMD</span>  [<span class="string">"/bin/bash"</span>, <span class="string">"/app/info.sh"</span>]</pre>
+      </div>
+
+      <div class="diagram">
+        <div style="color:var(--text2);margin-bottom:0.6rem">Comparativa gestores de paquetes</div>
+        <div><span class="d-box d-green" style="min-width:80px;text-align:center;display:inline-block">Alpine</span>  <span style="color:var(--text2);font-family:var(--mono);font-size:0.78rem">  apk add --no-cache curl</span></div>
+        <br>
+        <div><span class="d-box d-purple" style="min-width:80px;text-align:center;display:inline-block">Debian</span>  <span style="color:var(--text2);font-family:var(--mono);font-size:0.78rem">  apt-get install -y curl</span></div>
+        <br>
+        <div><span class="d-box d-blue" style="min-width:80px;text-align:center;display:inline-block">Arch</span>    <span style="color:var(--text2);font-family:var(--mono);font-size:0.78rem">  pacman -S --noconfirm curl</span></div>
+        <br><br>
+        <div style="color:var(--text2);font-size:0.78rem">Limpiar caché:</div>
+        <div><span class="d-box d-green" style="min-width:80px;text-align:center;display:inline-block">Alpine</span>  <span style="color:var(--text2);font-family:var(--mono);font-size:0.78rem">  rm -rf /var/cache/apk/*</span></div>
+        <br>
+        <div><span class="d-box d-purple" style="min-width:80px;text-align:center;display:inline-block">Debian</span>  <span style="color:var(--text2);font-family:var(--mono);font-size:0.78rem">  apt-get clean &amp;&amp; rm /var/lib/apt/lists/*</span></div>
+        <br>
+        <div><span class="d-box d-blue" style="min-width:80px;text-align:center;display:inline-block">Arch</span>    <span style="color:var(--text2);font-family:var(--mono);font-size:0.78rem">  pacman -Scc --noconfirm</span></div>
+      </div>
+    </div>
+
+    <!-- N3A Python -->
+    <div class="page" id="n3a">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#0d1a2e;color:#4f9cf9;border:1px solid #1a3050">NIVEL 3</span></div>
+        <div>
+          <h2>Python HTTP server</h2>
+          <p>Primer proceso en foreground. Conceptos clave: <code>EXPOSE</code>, mapeo de puertos <code>-p</code>, y la diferencia crítica entre <code>CMD</code> y <code>ENTRYPOINT</code>.</p>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel3-python/</span>
+        </div>
+        <pre><span class="keyword">FROM</span> <span class="string">debian:bullseye</span>
+
+<span class="keyword">RUN</span> <span class="cmd">apt-get update</span> && \
+    <span class="cmd">DEBIAN_FRONTEND=noninteractive apt-get install -y python3</span> \
+    && <span class="cmd">apt-get clean && rm -rf /var/lib/apt/lists/*</span>
+
+<span class="keyword">WORKDIR</span> <span class="string">/var/www/html</span>
+<span class="keyword">COPY</span> <span class="normal">index.html /var/www/html/index.html</span>
+
+<span class="comment"># EXPOSE: documenta el puerto (NO lo abre)</span>
+<span class="keyword">EXPOSE</span> <span class="normal">8000</span>
+
+<span class="comment"># ENTRYPOINT: ejecutable fijo</span>
+<span class="comment"># CMD: argumentos por defecto (sobreescribibles)</span>
+<span class="keyword">ENTRYPOINT</span> [<span class="string">"python3"</span>, <span class="string">"-m"</span>, <span class="string">"http.server"</span>]
+<span class="keyword">CMD</span>         [<span class="string">"8000"</span>]</pre>
+      </div>
+
+      <div class="diagram">
+        <div style="color:var(--text2);margin-bottom:0.5rem">CMD vs ENTRYPOINT</div>
+        <div><span class="d-box d-blue">docker run imagen</span> <span class="d-arrow">→ python3 -m http.server 8000</span></div>
+        <div><span class="d-box d-blue">docker run imagen 9000</span> <span class="d-arrow">→ python3 -m http.server <span style="color:var(--amber)">9000</span></span></div>
+        <div style="margin-top:0.8rem"><span class="d-arrow">Mapeo de puertos: -p HOST:CONTENEDOR</span></div>
+        <div><span class="d-box d-purple">docker run -p 8080:8000</span> <span class="d-arrow">→ localhost:8080 → contenedor:8000</span></div>
+      </div>
+
+      <div class="tip warn">
+        <div class="tip-icon">⚡</div>
+        <div><strong>Concepto clave para Inception:</strong> el proceso debe correr en foreground como PID 1. Si el proceso se daemoniza solo, el contenedor muere inmediatamente.</div>
+      </div>
+    </div>
+
+    <!-- N3B Nginx -->
+    <div class="page" id="n3b">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#0d1a2e;color:#4f9cf9;border:1px solid #1a3050">NIVEL 3</span></div>
+        <div>
+          <h2>Nginx con conf propia</h2>
+          <p>Nginx se daemoniza por defecto. Aprende a forzarlo en foreground con <code>daemon off</code>. Base directa del Nginx de Inception.</p>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel3-nginx/</span>
+        </div>
+        <pre><span class="keyword">FROM</span> <span class="string">debian:bullseye</span>
+
+<span class="keyword">RUN</span> <span class="cmd">apt-get update</span> && \
+    <span class="cmd">DEBIAN_FRONTEND=noninteractive apt-get install -y nginx</span> \
+    && <span class="cmd">apt-get clean && rm -rf /var/lib/apt/lists/*</span>
+
+<span class="comment"># Reemplaza la configuración por defecto</span>
+<span class="keyword">COPY</span> <span class="normal">nginx.conf /etc/nginx/nginx.conf</span>
+<span class="keyword">COPY</span> <span class="normal">html/ /var/www/html/</span>
+
+<span class="keyword">EXPOSE</span> <span class="normal">80</span>
+
+<span class="comment"># CRÍTICO: "daemon off" = nginx en foreground = PID 1</span>
+<span class="comment"># Sin esto: nginx va al background → proceso muere → contenedor sale</span>
+<span class="keyword">CMD</span> [<span class="string">"nginx"</span>, <span class="string">"-g"</span>, <span class="string">"daemon off;"</span>]</pre>
+      </div>
+
+      <div class="diagram">
+        <div style="color:var(--text2);margin-bottom:0.5rem">Sin daemon off vs con daemon off</div>
+        <div><span class="d-box d-red">nginx</span> <span class="d-arrow">→ fork → worker (bg) → PID 1 termina → </span><span class="d-box d-red">contenedor muere ✗</span></div>
+        <br>
+        <div><span class="d-box d-green">nginx -g "daemon off;"</span> <span class="d-arrow">→ PID 1 = nginx master → contenedor vive ✓</span></div>
+      </div>
+    </div>
+
+    <!-- N4A MySQL -->
+    <div class="page" id="n4a">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#1a0d2e;color:#7c5ff0;border:1px solid #3a1a5a">NIVEL 4</span></div>
+        <div>
+          <h2>MySQL / MariaDB</h2>
+          <p>Instalado desde paquetes (sin imagen oficial). Aprende <code>VOLUME</code>, <code>HEALTHCHECK</code>, inicialización con scripts y el patrón <code>exec</code> para PID 1.</p>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Dockerfile</span>
+          <span class="code-lang">nivel4-mysql/</span>
+        </div>
+        <pre><span class="comment"># Para Inception: FROM debian:bullseye, NO mysql:latest</span>
+<span class="keyword">FROM</span> <span class="string">debian:bullseye</span>
+
+<span class="keyword">RUN</span> <span class="cmd">apt-get update</span> && \
+    <span class="cmd">DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        mariadb-server</span> \
+    && <span class="cmd">apt-get clean && rm -rf /var/lib/apt/lists/*</span>
+
+<span class="keyword">COPY</span> <span class="normal">entrypoint.sh /entrypoint.sh</span>
+<span class="keyword">RUN</span>  <span class="cmd">chmod +x /entrypoint.sh</span>
+
+<span class="comment"># VOLUME: los datos sobreviven al contenedor</span>
+<span class="keyword">VOLUME</span> [<span class="string">"/var/lib/mysql"</span>]
+<span class="keyword">EXPOSE</span> <span class="normal">3306</span>
+
+<span class="comment"># HEALTHCHECK: docker sabe si el servicio está realmente listo</span>
+<span class="comment"># Otros contenedores usan depends_on con condition: service_healthy</span>
+<span class="keyword">HEALTHCHECK</span> <span class="flag">--interval</span>=10s <span class="flag">--timeout</span>=5s <span class="flag">--retries</span>=3 \
+    <span class="cmd">CMD mysqladmin ping -h localhost</span>
+
+<span class="keyword">ENTRYPOINT</span> [<span class="string">"/entrypoint.sh"</span>]</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">entrypoint.sh (fragmento clave)</span>
+          <span class="code-lang">bash</span>
+        </div>
+        <pre><span class="comment"># exec reemplaza el script por mysqld</span>
+<span class="comment"># → mysqld es PID 1 (no el script bash)</span>
+<span class="comment"># → recibe señales SIGTERM correctamente</span>
+<span class="keyword">exec</span> <span class="cmd">mysqld --user=mysql --bind-address=0.0.0.0</span></pre>
+      </div>
+
+      <div class="tip">
+        <div class="tip-icon">💡</div>
+        <div><code>exec</code> al final del entrypoint es el patrón correcto para Inception. Reemplaza el shell por el proceso final, que se convierte en PID 1 y puede recibir señales del sistema correctamente.</div>
+      </div>
+    </div>
+
+    <!-- N4B Red y volúmenes -->
+    <div class="page" id="n4b">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#1a0d2e;color:#7c5ff0;border:1px solid #3a1a5a">NIVEL 4</span></div>
+        <div>
+          <h2>Redes y volúmenes</h2>
+          <p>docker-compose con <code>networks</code> (bridge, DNS interno) y <code>volumes</code> named. Base de la arquitectura de Inception.</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Networks bridge</h3>
+          <ul>
+            <li>Red virtual privada aislada</li>
+            <li>DNS interno: nombre servicio = hostname</li>
+            <li>web puede hacer curl http://db:3306</li>
+            <li>Prohibido --link en Inception</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Volumes named</h3>
+          <ul>
+            <li>Datos persisten entre up/down</li>
+            <li>docker compose down NO los borra</li>
+            <li>down -v sí los borra</li>
+            <li>En Inception: bind mount al host</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">docker-compose.yml</span>
+          <span class="code-lang">nivel4-red/</span>
+        </div>
+        <pre><span class="keyword">services</span>:
+  db:
+    build: ../nivel4-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: mi_db
+    <span class="cmd">volumes</span>:
+      - <span class="string">db_data:/var/lib/mysql</span>   <span class="comment"># volumen named</span>
+    <span class="cmd">networks</span>:
+      - <span class="string">red_interna</span>
+    <span class="flag">healthcheck</span>:
+      test: [<span class="string">"CMD"</span>, <span class="string">"mysqladmin"</span>, <span class="string">"ping"</span>]
+      interval: 10s
+      retries: 5
+
+  web:
+    build: ../nivel3-nginx
+    ports: [<span class="string">"8080:80"</span>]
+    networks: [<span class="string">red_interna</span>]
+    depends_on:
+      db:
+        condition: <span class="string">service_healthy</span>   <span class="comment"># espera healthcheck ✓</span>
+
+<span class="keyword">volumes</span>:
+  db_data:
+    name: nivel4_db_data
+
+<span class="keyword">networks</span>:
+  red_interna:
+    driver: <span class="string">bridge</span></pre>
+      </div>
+    </div>
+
+    <!-- N5 Inception -->
+    <div class="page" id="n5">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#2a1800;color:#f0a832;border:1px solid #5a3800">NIVEL 5</span></div>
+        <div>
+          <h2>Stack Inception completo</h2>
+          <p>MariaDB + WordPress (php-fpm) + Nginx (TLS). Todo desde <code>debian:bullseye</code>, sin imágenes oficiales de servicio.</p>
+        </div>
+      </div>
+
+      <div class="stack-diagram">
+        <div class="service-row">
+          <div class="service-name" style="background:#0d1a10;color:#3de88a;border:1px solid #1a4020">Nginx</div>
+          <div class="service-details">
+            <span class="tag highlight">:443 HTTPS</span>
+            <span class="tag">TLSv1.2 + TLSv1.3</span>
+            <span class="tag">cert self-signed</span>
+            <span class="tag">proxy_pass → php-fpm</span>
+            <span class="tag">vol: wp_data</span>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--text2);font-size:0.8rem;padding:0.3rem 0">↕ fastcgi_pass wordpress:9000</div>
+        <div class="service-row">
+          <div class="service-name" style="background:#0d1a2e;color:#4f9cf9;border:1px solid #1a3050">WordPress</div>
+          <div class="service-details">
+            <span class="tag highlight">php-fpm :9000</span>
+            <span class="tag">wp-cli setup</span>
+            <span class="tag">FROM debian:bullseye</span>
+            <span class="tag">vol: wp_data</span>
+            <span class="tag">exec php-fpm --nodaemonize</span>
+          </div>
+        </div>
+        <div style="text-align:center;color:var(--text2);font-size:0.8rem;padding:0.3rem 0">↕ TCP mariadb:3306</div>
+        <div class="service-row">
+          <div class="service-name" style="background:#1a0d2e;color:#7c5ff0;border:1px solid #3a1a5a">MariaDB</div>
+          <div class="service-details">
+            <span class="tag highlight">:3306</span>
+            <span class="tag">FROM debian:bullseye</span>
+            <span class="tag">init + entrypoint.sh</span>
+            <span class="tag">exec mysqld</span>
+            <span class="tag">vol: db_data</span>
+            <span class="tag">healthcheck</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vol-diagram">
+        <div class="vol-box">
+          <div class="vol-title">📦 db_data</div>
+          <div class="vol-item">/home/login/data/mysql</div>
+          <div class="vol-item">bind mount al host</div>
+          <div class="vol-item">usado por: MariaDB</div>
+        </div>
+        <div class="vol-box">
+          <div class="vol-title">📦 wp_data</div>
+          <div class="vol-item">/home/login/data/wordpress</div>
+          <div class="vol-item">bind mount al host</div>
+          <div class="vol-item">usado por: WordPress + Nginx</div>
+        </div>
+        <div class="vol-box">
+          <div class="vol-title">🔒 .env</div>
+          <div class="vol-item">MYSQL_ROOT_PASSWORD</div>
+          <div class="vol-item">WP_ADMIN_PASSWORD</div>
+          <div class="vol-item">DOMAIN_NAME</div>
+          <div class="vol-item" style="color:var(--red)">en .gitignore ⚠️</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-filename">Makefile (comandos)</span>
+          <span class="code-lang">nivel5-inception/</span>
+        </div>
+        <pre><span class="cmd">make all</span>      <span class="comment"># crea dirs + build + up</span>
+<span class="cmd">make build</span>    <span class="comment"># solo build --no-cache</span>
+<span class="cmd">make up</span>       <span class="comment"># docker compose up -d</span>
+<span class="cmd">make down</span>     <span class="comment"># para y borra contenedores</span>
+<span class="cmd">make logs</span>     <span class="comment"># docker compose logs -f</span>
+<span class="cmd">make clean</span>    <span class="comment"># borra contenedores + imágenes</span>
+<span class="cmd">make fclean</span>   <span class="comment"># + borra volúmenes y datos del host</span>
+<span class="cmd">make re</span>       <span class="comment"># fclean + all</span></pre>
+      </div>
+    </div>
+
+    <!-- Reglas -->
+    <div class="page" id="reglas">
+      <div class="page-header">
+        <div><span class="level-badge" style="background:#2a0808;color:#f05252;border:1px solid #5a1a1a">42</span></div>
+        <div>
+          <h2>Reglas de Inception 42</h2>
+          <p>Cosas que el corrector va a revisar. Un error aquí = fallo inmediato.</p>
+        </div>
+      </div>
+
+      <div class="tip danger">
+        <div class="tip-icon">🚫</div>
+        <div><strong>Prohibido usar <code>latest</code></strong> como tag de imagen. Siempre versión explícita: <code>debian:bullseye</code>, <code>alpine:3.19</code>.</div>
+      </div>
+
+      <div class="tip danger">
+        <div class="tip-icon">🚫</div>
+        <div><strong>Prohibido usar imágenes oficiales de servicio</strong> directamente: no <code>mysql:8</code>, no <code>wordpress:latest</code>, no <code>nginx:alpine</code>. Debes construir desde <code>debian:bullseye</code> o <code>alpine</code>.</div>
+      </div>
+
+      <div class="tip danger">
+        <div class="tip-icon">🚫</div>
+        <div><strong>Prohibido <code>tail -f /dev/null</code></strong> o cualquier hack para mantener el contenedor vivo. El proceso real debe ser PID 1. Usa <code>exec servicio --nodaemon</code>.</div>
+      </div>
+
+      <ul class="rules">
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>PID 1 correcto:</strong> usa <code>exec</code> en el entrypoint para que el proceso final sea PID 1. Recibe señales SIGTERM y SIGKILL correctamente.</div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>Credenciales en .env:</strong> todas las contraseñas y secrets en <code>.env</code>. El fichero .env en <code>.gitignore</code>. Proporciona <code>.env.example</code> en el repo.</div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>Solo TLSv1.2 y TLSv1.3:</strong> nginx.conf debe tener <code>ssl_protocols TLSv1.2 TLSv1.3;</code> explícitamente. No SSLv3, no TLSv1.0, no TLSv1.1.</div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>Solo puerto 443:</strong> Nginx solo expone HTTPS. No port 80 en el compose final de Inception.</div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>Red sin --link:</strong> usa <code>networks:</code> en docker-compose. Docker crea DNS interno automáticamente.</div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>Volúmenes bind mount al host:</strong> <code>driver_opts: type: none, o: bind, device: /home/login/data/...</code></div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>restart: unless-stopped:</strong> los servicios deben reiniciarse automáticamente si el daemon de Docker arranca (simulado con reboot de la VM).</div>
+        </li>
+        <li>
+          <span class="r-icon">✅</span>
+          <div><strong>Makefile con targets:</strong> <code>all</code>, <code>build</code>, <code>up</code>, <code>down</code>, <code>clean</code>, <code>fclean</code>, <code>re</code> mínimo.</div>
+        </li>
+      </ul>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>

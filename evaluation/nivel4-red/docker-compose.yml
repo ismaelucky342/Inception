@@ -1,0 +1,90 @@
+# ============================================================
+# NIVEL 4B + 4C — Multi-contenedor con red y volúmenes
+# Concepto: docker-compose, networks, volumes, depends_on
+#
+# Uso:
+#   docker compose up -d       (arrancar en background)
+#   docker compose logs -f     (ver logs)
+#   docker compose down        (parar y borrar contenedores)
+#   docker compose down -v     (también borra volúmenes)
+# ============================================================
+
+services:
+
+  # ── Servicio de base de datos ────────────────────────────
+  db:
+    build:
+      context: ../nivel4-mysql
+      dockerfile: Dockerfile
+    container_name: nivel4_db
+
+    # Variables de entorno: NUNCA hardcodeadas en producción
+    # En Inception usarás un fichero .env
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass_ejemplo
+      MYSQL_DATABASE: mi_db
+      MYSQL_USER: mi_usuario
+      MYSQL_PASSWORD: mi_pass_ejemplo
+
+    # Volumen named: los datos persisten entre docker compose down/up
+    # Solo se borran con: docker compose down -v
+    volumes:
+      - db_data:/var/lib/mysql
+
+    # Red interna del stack
+    networks:
+      - red_interna
+
+    # El contenedor se reinicia automáticamente si cae
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass_ejemplo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ── Servicio web (nginx simple) ──────────────────────────
+  web:
+    build:
+      context: ../nivel3-nginx
+      dockerfile: Dockerfile
+    container_name: nivel4_web
+
+    # Mapeo de puertos: HOST:CONTENEDOR
+    ports:
+      - "8080:80"
+
+    networks:
+      - red_interna
+
+    # depends_on: espera a que 'db' esté healthy antes de arrancar
+    depends_on:
+      db:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+
+# ── Volúmenes named ────────────────────────────────────────
+# Los volúmenes se crean automáticamente si no existen
+# Se almacenan en /var/lib/docker/volumes/ en el host
+volumes:
+  db_data:
+    name: nivel4_db_data   # nombre explícito (recomendado)
+
+
+# ── Redes ──────────────────────────────────────────────────
+networks:
+  red_interna:
+    # bridge = red privada virtual donde los contenedores
+    # se pueden comunicar por nombre (DNS interno de Docker)
+    driver: bridge
+    name: nivel4_red
+
+    # Con esta red, 'web' puede hacer: curl http://db:3306
+    # Docker resuelve "db" al IP del contenedor de db
+    #
+    # ⚠️  En Inception: PROHIBIDO usar --link
+    #     DEBES usar networks como aquí

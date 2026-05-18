@@ -1,0 +1,117 @@
+# ============================================================
+# NIVEL 5 — Stack completo Inception 42
+# Servicios: MariaDB + WordPress (php-fpm) + Nginx (TLS)
+#
+# Uso:
+#   cp .env.example .env && vim .env   (configura credenciales)
+#   make all                           (build + up)
+#   make down                          (parar)
+# ============================================================
+
+services:
+
+  # ── MariaDB ─────────────────────────────────────────────
+  mariadb:
+    build:
+      context: ./srcs/requirements/mariadb
+      dockerfile: Dockerfile
+    container_name: mariadb
+    image: mariadb
+
+    # Las credenciales vienen del fichero .env (NUNCA en el compose)
+    env_file: .env
+
+    volumes:
+      - db_data:/var/lib/mysql
+
+    networks:
+      - inception
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ── WordPress + php-fpm ──────────────────────────────────
+  wordpress:
+    build:
+      context: ./srcs/requirements/wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress
+    image: wordpress
+
+    env_file: .env
+
+    volumes:
+      # Volumen compartido con nginx para los ficheros de WP
+      - wp_data:/var/www/html
+
+    networks:
+      - inception
+
+    # WordPress necesita que MariaDB esté listo para conectar
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+
+  # ── Nginx con TLS ────────────────────────────────────────
+  nginx:
+    build:
+      context: ./srcs/requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    image: nginx
+
+    env_file: .env
+
+    volumes:
+      # Lee los ficheros PHP de WordPress
+      - wp_data:/var/www/html
+
+    ports:
+      # Solo puerto 443 expuesto al mundo (TLSv1.2 o TLSv1.3)
+      # Inception prohíbe exponer el puerto 80
+      - "443:443"
+
+    networks:
+      - inception
+
+    depends_on:
+      - wordpress
+
+    restart: unless-stopped
+
+
+# ── Volúmenes ────────────────────────────────────────────────
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # Ruta en el host (Inception requiere /home/login/data/...)
+      device: /home/${LOGIN}/data/mysql
+
+  wp_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${LOGIN}/data/wordpress
+
+
+# ── Red interna ──────────────────────────────────────────────
+networks:
+  inception:
+    driver: bridge
+    # Los contenedores se comunican por nombre:
+    # nginx → wordpress:9000 (php-fpm)
+    # wordpress → mariadb:3306 (mysql)

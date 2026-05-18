@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Docker Nivel 3 — Nginx</title>
+    <style>
+        body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 2rem; }
+        h1 { color: #58a6ff; }
+        .box { background: #161b22; border: 1px solid #30363d; padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+        code { color: #f0883e; background: #1f2428; padding: 2px 4px; border-radius: 3px; }
+        .ok { color: #3fb950; }
+        .warn { color: #d29922; }
+    </style>
+</head>
+<body>
+    <h1>🐳 Ejemplo 3 — Nginx con conf custom</h1>
+    <div class="box">
+        <p class="ok"> Nginx sirviendo con configuración propia</p>
+        <p>Puerto del contenedor: <code>80</code> → mapeado a <code>8080</code> en el host</p>
+    </div>
+    <div class="box">
+        <h2>Lo importante</h2>
+        <ul>
+            <li><code>daemon off</code> — mantiene nginx en foreground (PID 1)</li>
+            <li><code>nginx.conf</code> propio — reemplaza la config default</li>
+            <li>Sin esto el contenedor moriría inmediatamente</li>
+        </ul>
+    </div>
+    <div class="box">
+        <p class="warn"> este patrón (proceso en foreground) es la base de todos los servicios en Inception 42</p>
+    </div>
+</body>
+</html>

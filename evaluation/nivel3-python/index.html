@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Docker Nivel 3 — Python HTTP</title>
+    <style>
+        body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 2rem; }
+        h1 { color: #58a6ff; }
+        .box { background: #161b22; border: 1px solid #30363d; padding: 1rem; border-radius: 6px; margin: 1rem 0; }
+        code { color: #f0883e; }
+        .ok { color: #3fb950; }
+    </style>
+</head>
+<body>
+    <h1>🐳 Nivel 3 — Servidor Python HTTP</h1>
+    <div class="box">
+        <p class="ok">✓ Contenedor ejecutándose correctamente</p>
+        <p>Este HTML está siendo servido por <code>python3 -m http.server</code> desde dentro del contenedor.</p>
+    </div>
+    <div class="box">
+        <h2>Conceptos de este nivel</h2>
+        <ul>
+            <li><code>EXPOSE 8000</code> — documenta el puerto</li>
+            <li><code>-p 8080:8000</code> — mapea host:contenedor</li>
+            <li><code>ENTRYPOINT</code> + <code>CMD</code> — proceso en foreground</li>
+            <li>PID 1 = el proceso principal del contenedor</li>
+        </ul>
+    </div>
+</body>
+</html>
