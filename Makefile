@@ -1,4 +1,3 @@
-
 # Makefile
 COMPOSE_FILE = srcs/docker-compose.yml
 
@@ -24,5 +23,23 @@ down:
 	@echo "--- Stopping and removing all containers, networks, and volumes ---"
 	docker-compose -f $(COMPOSE_FILE) down -v
 
-# Target para limpiar volúmenes y reiniciar (MUY ÚTIL)
+# Target para limpiar volúmenes y reiniciar
 re: down up
+
+# Targets BONUS
+bonus:
+	@echo "--- Bonus services status ---"
+	@echo " Redis (Cache)"
+	@echo " FTP Server"
+	@echo " Grafana + Prometheus (Monitoring)"
+	@echo " Adminer (Database UI)"
+	@echo " Static Website"
+	@docker-compose -f $(COMPOSE_FILE) ps | grep -E 'redis|ftp|grafana|prometheus|adminer|static-site|cadvisor' || echo "Bonus services not running"
+
+logs:
+	@docker-compose -f $(COMPOSE_FILE) logs -f
+
+clean:
+	@echo "--- Cleaning up docker resources ---"
+	@docker system prune -f
+	@echo "✓ Cleaned"

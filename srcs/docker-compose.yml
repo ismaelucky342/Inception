@@ -65,21 +65,122 @@ services:
     ports:
       - "443:443"
 
+  # ── BONUS SERVICES ──────────────────────────────────────
+
+  # ── 4. Redis (Cache) ────────────────────────────────────
+  redis:
+    build: ./requirements/bonus/redis
+    container_name: redis
+    image: redis
+    restart: on-failure
+    volumes:
+      - redis_data:/var/lib/redis
+    networks:
+      - inception
+    expose:
+      - "6379"
+
+  # ── 5. FTP Server ──────────────────────────────────────
+  ftp:
+    build: ./requirements/bonus/ftp
+    container_name: ftp
+    image: ftp
+    restart: on-failure
+    depends_on:
+      - wordpress
+    volumes:
+      - wp_data:/var/www/html
+    networks:
+      - inception
+    ports:
+      - "20:20"
+      - "21:21"
+      - "10000-10100:10000-10100"
+
+  # ── 6. cAdvisor (Docker metrics) ─────────────────────────
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: on-failure
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - inception
+    expose:
+      - "8080"
+
+  # ── 7. Prometheus (Metrics collector) ───────────────────
+  prometheus:
+    build: ./requirements/bonus/prometheus
+    container_name: prometheus
+    image: prometheus
+    restart: on-failure
+    volumes:
+      - prometheus_data:/var/lib/prometheus
+    networks:
+      - inception
+    expose:
+      - "9090"
+
+  # ── 8. Grafana (Dashboards) ────────────────────────────
+  grafana:
+    build: ./requirements/bonus/grafana
+    container_name: grafana
+    image: grafana
+    restart: on-failure
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - inception
+    ports:
+      - "3000:3000"
+
+  # ── 9. Adminer (Database UI) ────────────────────────────
+  adminer:
+    build: ./requirements/bonus/adminer
+    container_name: adminer
+    image: adminer
+    restart: on-failure
+    depends_on:
+      - mariadb
+    networks:
+      - inception
+    ports:
+      - "8081:8081"
+
+  # ── 10. Static Website ─────────────────────────────────
+  static-site:
+    build: ./requirements/bonus/static-site
+    container_name: static-site
+    image: static-site
+    restart: on-failure
+    networks:
+      - inception
+    ports:
+      - "8080:8080"
+
 # ── Volúmenes nombrados ──────────────────────────────────
 volumes:
   db_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/ismherna/data/mysql
 
   wp_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/ismherna/data/wordpress
+
+  redis_data:
+    driver: local
+
+  prometheus_data:
+    driver: local
+
+  grafana_data:
+    driver: local
 
 # ── Red interna ──────────────────────────────────────────
 networks:
