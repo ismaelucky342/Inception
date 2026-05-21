@@ -10,17 +10,17 @@ FROM alpine:3.18
 # php83-session: manejo de sesiones
 # wget / unzip: para descargar WordPress
 RUN apk add --no-cache \
-    php83 \
-    php83-fpm \
-    php83-mysqli \
-    php83-phar \
-    php83-iconv \
-    php83-mbstring \
-    php83-curl \
-    php83-dom \
-    php83-xml \
-    php83-session \
-    php83-tokenizer \
+    php \
+    php-fpm \
+    php-mysqli \
+    php-phar \
+    php-iconv \
+    php-mbstring \
+    php-curl \
+    php-dom \
+    php-xml \
+    php-session \
+    php-tokenizer \
     wget \
     unzip
 
@@ -31,7 +31,7 @@ RUN wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     && mv wp-cli.phar /usr/local/bin/wp
 
 # Configuración de php-fpm
-COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
+COPY conf/www.conf /etc/php/php-fpm.d/www.conf
 
 # Script de inicialización
 COPY tools/init.sh /usr/local/bin/init.sh
