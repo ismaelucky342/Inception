@@ -1,3 +1,4 @@
+#!/bin/sh
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -9,8 +10,6 @@
 #    Updated: 2026/06/15 00:04:37 by ismherna         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-
-#!/bin/sh
 # ─────────────────────────────────────────────────────
 # init.sh — Inicialización de WordPress con WP-CLI
 # ─────────────────────────────────────────────────────
@@ -21,6 +20,7 @@ WP_PATH="/var/www/html"
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 WP_ADMIN_USER=$(cat /run/secrets/credentials | head -1)
 WP_ADMIN_PASSWORD=$(cat /run/secrets/credentials | tail -1)
+WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password)
 
 # ── 1. Descargar WordPress si no está instalado ──────────
 if [ ! -f "${WP_PATH}/wp-login.php" ]; then

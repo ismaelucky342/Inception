@@ -19,6 +19,10 @@ RUN apk add --no-cache grafana
 RUN mkdir -p /var/lib/grafana && \
     chown -R grafana:grafana /var/lib/grafana
 
+# Provisionar Prometheus como datasource automáticamente
+RUN mkdir -p /etc/grafana/provisioning/datasources
+COPY conf/datasource.yml /etc/grafana/provisioning/datasources/datasource.yml
+
 # Script de inicialización
 COPY tools/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh

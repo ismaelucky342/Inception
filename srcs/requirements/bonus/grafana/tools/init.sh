@@ -1,3 +1,4 @@
+#!/bin/sh
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -10,13 +11,14 @@
 #                                                                              #
 # **************************************************************************** #
 
-#!/bin/sh
-
 # Crear directorio de datos si no existe
 mkdir -p /var/lib/grafana
 
 # Asegurar permisos correctos
 chown -R grafana:grafana /var/lib/grafana
 
-# Iniciar Grafana
-grafana-server --homepath=/usr/share/grafana --config=/etc/grafana/grafana.ini
+# Password de admin desde el secret (nunca en el compose/git)
+export GF_SECURITY_ADMIN_PASSWORD=$(cat /run/secrets/grafana_admin_password)
+
+# Iniciar Grafana en foreground como PID 1
+exec grafana-server --homepath=/usr/share/grafana --config=/usr/share/grafana/conf/defaults.ini

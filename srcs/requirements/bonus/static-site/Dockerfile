@@ -12,14 +12,14 @@
 
 FROM alpine:3.18
 
-# Instalar nginx
-RUN apk add --no-cache nginx
+# Instalar nginx + gettext (envsubst, para inyectar DOMAIN_NAME en runtime)
+RUN apk add --no-cache nginx gettext
 
 # Crear directorio para el sitio
 RUN mkdir -p /var/www/html
 
-# Copiar archivos del sitio
-COPY html/ /var/www/html/
+# Copiar el sitio como plantilla: DOMAIN_NAME se resuelve en init.sh
+COPY html/ /etc/nginx/site-template/
 
 # Configuración de nginx
 COPY conf/nginx.conf /etc/nginx/http.d/default.conf

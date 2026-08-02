@@ -12,9 +12,10 @@
 
 FROM alpine:3.18
 
-RUN apk add --no-cache nginx openssl
+RUN apk add --no-cache nginx openssl gettext
 
-COPY conf/nginx.conf /etc/nginx/http.d/default.conf
+# La conf se copia como plantilla: DOMAIN_NAME se sustituye en runtime (init.sh)
+COPY conf/nginx.conf /etc/nginx/templates/default.conf.template
 
 COPY tools/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh

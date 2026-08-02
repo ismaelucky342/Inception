@@ -1,3 +1,4 @@
+#!/bin/sh
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -10,7 +11,9 @@
 #                                                                              #
 # **************************************************************************** #
 
-#!/bin/sh
+# Copiar los assets estáticos y sustituir DOMAIN_NAME en el HTML antes de servirlo
+cp -r /etc/nginx/site-template/. /var/www/html/
+envsubst '${DOMAIN_NAME}' < /etc/nginx/site-template/index.html > /var/www/html/index.html
 
-# Iniciar NGINX
-nginx -g "daemon off;"
+# Iniciar NGINX en foreground como PID 1
+exec nginx -g "daemon off;"

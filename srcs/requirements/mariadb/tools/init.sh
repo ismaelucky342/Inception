@@ -1,3 +1,4 @@
+#!/bin/sh
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -9,8 +10,6 @@
 #    Updated: 2026/06/15 00:04:37 by ismherna         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-
-#!/bin/sh
 # ─────────────────────────────────────────────
 # init.sh — Inicialización de MariaDB en Alpine
 # ─────────────────────────────────────────────
@@ -37,8 +36,12 @@ until mysqladmin ping --silent 2>/dev/null; do
 done
 echo "[init] MariaDB lista."
 
-# 4. Configurar root, BD y usuario de WordPress
-mysql -u root << EOF
+# 4. Configurar root, BD y usuario de WordPress (solo la primera vez)
+#    En reinicios, root ya tiene contraseña puesta desde el volumen persistente,
+#    por lo que "mysql -u root" sin -p fallaría con Access Denied y dejaba
+#    el contenedor en bucle de reinicio. Se guarda un flag para no repetirlo.
+if [ ! -f "/var/lib/mysql/.initialized" ]; then
+    mysql -u root << EOF
 UPDATE mysql.user
     SET authentication_string = PASSWORD('${MYSQL_ROOT_PASSWORD}'),
         plugin = 'mysql_native_password'
@@ -58,9 +61,13 @@ GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-echo "[init] Usuarios y base de datos configurados."
+    touch "/var/lib/mysql/.initialized"
+    echo "[init] Usuarios y base de datos configurados."
+else
+    echo "[init] Ya inicializado previamente, se omite configuración de root/usuarios."
+fi
 
-# 5. Apagar el servidor temporal
+# 5. Apagar el servidor temporal (usando siempre la contraseña actual de root)
 mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
 
 wait $MYSQL_PID

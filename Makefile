@@ -5,53 +5,48 @@
 #                                                     +:+ +:+         +:+      #
 #    By: ismherna <ismherna@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/03/12 00:04:14 by ismherna          #+#    #+#              #
-#    Updated: 2026/06/15 00:04:37 by ismherna         ###   ########.fr        #
-#                                                                              #
 # **************************************************************************** #
 
-# Makefile
 COMPOSE_FILE = srcs/docker-compose.yml
+COMPOSE_PARALLEL_LIMIT = 1
+VOLUMES = db_data wp_data redis_data prometheus_data grafana_data
+IMAGES  = inception_mariadb inception_wordpress inception_nginx inception_redis \
+          inception_ftp inception_prometheus inception_grafana inception_adminer \
+          inception_static_site
 
-# Target principal: Levantar la infraestructura
 all: up
 
-# Target para construir la imagen de MariaDB
-build_mariadb:
-	@echo "--- Building MariaDB Image ---"
-	docker-compose -f $(COMPOSE_FILE) build mariadb
-
-# Target para levantar el servicio MariaDB (en modo detached)
-up_mariadb: build_mariadb
-	@echo "--- Starting MariaDB Container ---"
-	docker-compose -f $(COMPOSE_FILE) up -d mariadb
-
-# Targets generales (útiles para el flujo de trabajo)
 up:
-	@echo "--- Starting all services (up) ---"
+	@echo "--- Starting all services ---"
 	docker-compose -f $(COMPOSE_FILE) up -d --build
 
 down:
-	@echo "--- Stopping and removing all containers, networks, and volumes ---"
-	docker-compose -f $(COMPOSE_FILE) down -v
+	@echo "--- Stopping all services (keeping volumes) ---"
+	docker-compose -f $(COMPOSE_FILE) down --remove-orphans
 
-# Target para limpiar volúmenes y reiniciar
-re: down up
+clean: down
+	@echo "--- Removing project images ---"
+	@for img in $(IMAGES); do \
+		docker rmi -f $$img 2>/dev/null || true; \
+	done
 
-# Targets BONUS
-bonus:
-	@echo "--- Bonus services status ---"
-	@echo " Redis (Cache)"
-	@echo " FTP Server"
-	@echo " Grafana + Prometheus (Monitoring)"
-	@echo " Adminer (Database UI)"
-	@echo " Static Website"
-	@docker-compose -f $(COMPOSE_FILE) ps | grep -E 'redis|ftp|grafana|prometheus|adminer|static-site|cadvisor' || echo "Bonus services not running"
+fclean: clean
+	@echo "--- Full clean: volumes, network, dangling images and builder cache ---"
+	@docker-compose -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans 2>/dev/null || true
+	@for vol in $(VOLUMES); do \
+		docker volume rm $$vol 2>/dev/null || true; \
+	done
+	@docker network rm inception 2>/dev/null || true
+	@docker builder prune -f
+	@echo "Cleanup complete."
+
+re: fclean up
 
 logs:
-	@docker-compose -f $(COMPOSE_FILE) logs -f
+	docker-compose -f $(COMPOSE_FILE) logs -f
 
-clean:
-	@echo "--- Cleaning up docker resources ---"
-	@docker system prune -f
-	@echo "✓ Cleaned"
+bonus:
+	@echo "--- Bonus services status ---"
+	@docker-compose -f $(COMPOSE_FILE) ps | grep -E 'redis|ftp|grafana|prometheus|adminer|static-site' || echo "Bonus services not running"
+
+.PHONY: all up down clean fclean re logs bonus

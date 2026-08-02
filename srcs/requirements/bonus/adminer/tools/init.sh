@@ -1,3 +1,4 @@
+#!/bin/sh
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -5,15 +6,13 @@
 #                                                     +:+ +:+         +:+      #
 #    By: ismherna <ismherna@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/03/12 00:03:54 by ismherna          #+#    #+#              #
+#    Created: 2026/03/12 00:04:00 by ismherna          #+#    #+#              #
 #    Updated: 2026/06/15 00:04:37 by ismherna         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-#!/bin/sh
-
-# Iniciar PHP-FPM
+# Iniciar PHP-FPM en segundo plano (proceso de soporte)
 php-fpm -D
 
-# Iniciar NGINX
-nginx -g "daemon off;"
+# NGINX queda como proceso principal (PID 1) en foreground
+exec nginx -g "daemon off;"

@@ -1,243 +1,316 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inception - ismherna</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>inception :: system status</title>
+<style>
+  :root{
+    --void:      #07080a;
+    --panel:     #0d0f12;
+    --panel-2:   #12151a;
+    --line:      #23271f;
+    --amber:     #ffb000;
+    --amber-dim: #8a5d00;
+    --amber-glow:#ffd166;
+    --text:      #e8e3d8;
+    --muted:     #6b6558;
+    --ok:        #5fd97a;
+    --mono: "JetBrains Mono","Fira Code",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+  *{margin:0;padding:0;box-sizing:border-box;}
 
-        .container {
-            max-width: 900px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+  html,body{
+    background:var(--void);
+    color:var(--text);
+    font-family:var(--mono);
+  }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 40px;
-            text-align: center;
-        }
+  body{
+    min-height:100vh;
+    padding:6vh 5vw 8vh;
+    background-image:
+      linear-gradient(rgba(255,176,0,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,176,0,0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    position:relative;
+  }
 
-        .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
+  /* leve textura de scanlines, muy sutil */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    z-index:2;
+  }
 
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
+  .wrap{max-width:900px; margin:0 auto; position:relative; z-index:1;}
 
-        .content {
-            padding: 60px 40px;
-        }
+  /* ── Header ───────────────────────────────────────── */
+  .eyebrow{
+    display:flex; align-items:center; gap:10px;
+    font-size:12px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--amber-dim); margin-bottom:18px;
+  }
+  .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--ok);
+    box-shadow:0 0 8px var(--ok);
+    animation:pulse 2.4s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.35;}
+  }
 
-        .section {
-            margin-bottom: 40px;
-        }
+  h1{
+    font-size:clamp(2rem, 6vw, 3.4rem);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:var(--amber);
+    text-shadow:0 0 24px rgba(255,176,0,0.25);
+    line-height:1.05;
+  }
+  .subhead{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:14px;
+    max-width:60ch;
+  }
+  .subhead b{color:var(--text); font-weight:500;}
 
-        .section h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
+  /* ── Boot log ─────────────────────────────────────── */
+  .boot{
+    margin-top:34px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    padding:16px 20px;
+    font-size:13px;
+    line-height:1.9;
+    color:var(--amber-dim);
+    overflow:hidden;
+  }
+  .boot .ok{color:var(--ok);}
+  .boot .line{opacity:0; animation:reveal 0s forwards;}
+  .boot .line:nth-child(1){animation-delay:.1s;}
+  .boot .line:nth-child(2){animation-delay:.5s;}
+  .boot .line:nth-child(3){animation-delay:.9s;}
+  .boot .line:nth-child(4){animation-delay:1.3s;}
+  @keyframes reveal{ to{opacity:1;} }
+  .cursor{
+    display:inline-block; width:7px; height:14px;
+    background:var(--amber); vertical-align:-2px;
+    animation:blink 1s step-end infinite;
+    margin-left:4px;
+  }
+  @keyframes blink{ 50%{opacity:0;} }
 
-        .service-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
+  @media (prefers-reduced-motion: reduce){
+    .boot .line{animation:none; opacity:1;}
+    .dot{animation:none;}
+    .cursor{animation:none;}
+  }
 
-        .service-card {
-            background: #f8f9fa;
-            border-left: 5px solid #667eea;
-            padding: 20px;
-            border-radius: 10px;
-            transition: transform 0.3s ease;
-        }
+  /* ── Tabla de servicios ───────────────────────────── */
+  .group{margin-top:46px;}
+  .group-label{
+    font-size:12px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--amber-dim);
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:14px;
+  }
+  .group-label::after{
+    content:""; flex:1; height:1px;
+    background:var(--line);
+  }
 
-        .service-card:hover {
-            transform: translateX(10px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
-        }
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  thead th{
+    text-align:left; font-weight:500; font-size:11px;
+    letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--muted);
+    padding:0 14px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding:14px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  tbody tr:hover td{background:var(--panel-2);}
 
-        .service-card h3 {
-            color: #764ba2;
-            margin-bottom: 10px;
-        }
+  .svc-id{color:var(--amber-dim); width:32px;}
+  .svc-name{color:var(--amber); font-weight:700; white-space:nowrap;}
+  .svc-role{color:var(--text); opacity:0.85;}
+  .svc-role small{display:block; color:var(--muted); margin-top:2px;}
+  .svc-port{color:var(--muted); white-space:nowrap;}
 
-        .service-card p {
-            color: #666;
-            font-size: 0.95em;
-            line-height: 1.6;
-        }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:4px 8px; border:1px solid var(--line); white-space:nowrap;
+  }
+  .badge.internal{color:var(--muted);}
+  .badge.internal .dot{width:5px;height:5px;background:var(--muted);box-shadow:none;animation:none;}
 
-        .links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
-        }
+  a.link{
+    color:var(--amber);
+    text-decoration:none;
+    border-bottom:1px solid var(--amber-dim);
+    padding-bottom:1px;
+    transition:color .15s, border-color .15s;
+  }
+  a.link:hover{color:var(--amber-glow); border-color:var(--amber-glow);}
+  a.link:focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
 
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
+  .here{color:var(--ok);}
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        }
+  /* ── Nota de arquitectura ─────────────────────────── */
+  .note{
+    margin-top:46px;
+    border-left:2px solid var(--amber-dim);
+    padding:4px 0 4px 18px;
+    font-size:13px;
+    line-height:1.85;
+    color:var(--muted);
+    max-width:68ch;
+  }
+  .note b{color:var(--text); font-weight:500;}
 
-        .footer {
-            background: #f8f9fa;
-            padding: 30px 40px;
-            text-align: center;
-            color: #666;
-            border-top: 1px solid #e9ecef;
-        }
+  /* ── Footer ───────────────────────────────────────── */
+  footer{
+    margin-top:56px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:12px; color:var(--muted);
+  }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-box .number {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-box .label {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-    </style>
+  @media (max-width:640px){
+    thead{display:none;}
+    tbody td{display:block; padding:6px 14px; border-bottom:none;}
+    tbody tr{display:block; border-bottom:1px solid var(--line); padding:12px 0;}
+    .svc-name{font-size:16px;}
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🐳 INCEPTION</h1>
-            <p>Sistema Docker Multi-contenedor con WordPress</p>
-        </div>
+  <div class="wrap">
 
-        <div class="content">
-            <div class="section">
-                <h2>📊 Servicios Desplegados</h2>
-                <div class="service-grid">
-                    <div class="service-card">
-                        <h3>🌐 NGINX</h3>
-                        <p>Servidor web reverse proxy. Maneja las conexiones HTTPS y distribuye el tráfico.</p>
-                    </div>
-                    <div class="service-card">
-                        <h3>💬 WordPress</h3>
-                        <p>Sistema de gestión de contenido con PHP-FPM para máximo rendimiento.</p>
-                    </div>
-                    <div class="service-card">
-                        <h3>🗄️ MariaDB</h3>
-                        <p>Base de datos relacional optimizada para WordPress.</p>
-                    </div>
-                    <div class="service-card">
-                        <h3>⚡ Redis</h3>
-                        <p>Sistema de caché en memoria para acelerar WordPress.</p>
-                    </div>
-                    <div class="service-card">
-                        <h3>📁 FTP</h3>
-                        <p>Servidor FTP para gestionar archivos de WordPress.</p>
-                    </div>
-                    <div class="service-card">
-                        <h3>📈 Grafana</h3>
-                        <p>Dashboards de monitoreo en tiempo real de los contenedores.</p>
-                    </div>
-                </div>
-            </div>
+    <div class="eyebrow"><span class="dot"></span> system status — inception / 42 madrid</div>
+    <h1>docker compose ps</h1>
+    <p class="subhead">Infraestructura multi-contenedor de <b>${DOMAIN_NAME}</b>: WordPress detrás de NGINX con TLS, MariaDB, y cinco servicios adicionales de bonus. Cada contenedor corre desde un Dockerfile propio, sin imágenes preconstruidas.</p>
 
-            <div class="section">
-                <h2>📈 Estadísticas del Proyecto</h2>
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="number">6+</div>
-                        <div class="label">Servicios Activos</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="number">100%</div>
-                        <div class="label">Uptime Target</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="number">∞</div>
-                        <div class="label">Escalabilidad</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🔗 Acceso Rápido</h2>
-                <div class="links">
-                    <a href="https://ismherna.42.fr" class="btn">WordPress</a>
-                    <a href="http://localhost:3000" class="btn">Grafana</a>
-                    <a href="http://localhost:8080/admin" class="btn">Adminer</a>
-                    <a href="http://localhost:8080" class="btn">Sitio Estático</a>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>🛠️ Tecnologías</h2>
-                <p style="line-height: 1.8; color: #666;">
-                    <strong>Contenedores:</strong> Docker & Docker Compose<br>
-                    <strong>Orquestación:</strong> Configuración multi-contenedor<br>
-                    <strong>Monitoreo:</strong> Grafana + Prometheus + cAdvisor<br>
-                    <strong>Almacenamiento:</strong> Volúmenes persistentes<br>
-                    <strong>Networking:</strong> Red bridge interna<br>
-                    <strong>Seguridad:</strong> Secrets gestionados
-                </p>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>🎓 Proyecto Inception - 42 School</p>
-            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.7;">
-                Desarrollado por ismherna - 2026
-            </p>
-        </div>
+    <div class="boot" aria-hidden="true">
+      <div class="line">$ docker compose up -d --build</div>
+      <div class="line">verificando red <span class="ok">inception</span> ... <span class="ok">ok</span></div>
+      <div class="line">montando volúmenes persistentes ... <span class="ok">ok</span></div>
+      <div class="line">9/9 contenedores activos<span class="cursor"></span></div>
     </div>
+
+    <div class="group">
+      <div class="group-label">core — obligatorio</div>
+      <table>
+        <thead>
+          <tr><th>#</th><th>servicio</th><th>rol</th><th>puerto</th><th>acceso</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="svc-id">01</td>
+            <td class="svc-name">nginx</td>
+            <td class="svc-role">Único punto de entrada. TLS 1.2/1.3 con certificado autofirmado.<small>reverse proxy</small></td>
+            <td class="svc-port">:443</td>
+            <td><a class="link" href="https://${DOMAIN_NAME}">Abrir</a></td>
+          </tr>
+          <tr>
+            <td class="svc-id">02</td>
+            <td class="svc-name">wordpress</td>
+            <td class="svc-role">CMS del sitio, servido vía PHP-FPM.<small>solo accesible desde nginx</small></td>
+            <td class="svc-port">:9000</td>
+            <td><span class="badge internal"><span class="dot"></span> red interna</span></td>
+          </tr>
+          <tr>
+            <td class="svc-id">03</td>
+            <td class="svc-name">mariadb</td>
+            <td class="svc-role">Base de datos relacional de WordPress.<small>datos en volumen persistente</small></td>
+            <td class="svc-port">:3306</td>
+            <td><span class="badge internal"><span class="dot"></span> red interna</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="group">
+      <div class="group-label">bonus</div>
+      <table>
+        <thead>
+          <tr><th>#</th><th>servicio</th><th>rol</th><th>puerto</th><th>acceso</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="svc-id">04</td>
+            <td class="svc-name">redis</td>
+            <td class="svc-role">Caché en memoria para acelerar WordPress.<small>appendonly, volumen propio</small></td>
+            <td class="svc-port">:6379</td>
+            <td><span class="badge internal"><span class="dot"></span> red interna</span></td>
+          </tr>
+          <tr>
+            <td class="svc-id">05</td>
+            <td class="svc-name">ftp</td>
+            <td class="svc-role">Acceso por FTP al volumen de WordPress.<small>modo pasivo 10000–10100</small></td>
+            <td class="svc-port">:21</td>
+            <td><a class="link" href="ftp://${DOMAIN_NAME}">Conectar</a></td>
+          </tr>
+          <tr>
+            <td class="svc-id">06</td>
+            <td class="svc-name">adminer</td>
+            <td class="svc-role">Administración web de la base de datos.<small>PHP-FPM + nginx propios</small></td>
+            <td class="svc-port">:8081</td>
+            <td><a class="link" href="http://${DOMAIN_NAME}:8081">Abrir</a></td>
+          </tr>
+          <tr>
+            <td class="svc-id">07</td>
+            <td class="svc-name">prometheus</td>
+            <td class="svc-role">Recolector de métricas del stack.<small>scrapea cada 15s</small></td>
+            <td class="svc-port">:9090</td>
+            <td><span class="badge internal"><span class="dot"></span> red interna</span></td>
+          </tr>
+          <tr>
+            <td class="svc-id">08</td>
+            <td class="svc-name">grafana</td>
+            <td class="svc-role">Dashboards de monitorización.<small>prometheus provisionado como datasource</small></td>
+            <td class="svc-port">:3000</td>
+            <td><a class="link" href="http://${DOMAIN_NAME}:3000">Abrir</a></td>
+          </tr>
+          <tr>
+            <td class="svc-id">09</td>
+            <td class="svc-name">static-site</td>
+            <td class="svc-role">Esta página. Panel de estado de la infraestructura.<small>servida por nginx propio</small></td>
+            <td class="svc-port">:8080</td>
+            <td><span class="here">estás aquí</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      Los nueve contenedores se comunican por la red bridge <b>inception</b>. Ningún servicio interno publica puerto al host: solo nginx, adminer, grafana, ftp y este panel son alcanzables desde fuera. Credenciales y contraseñas se inyectan en runtime vía <b>docker secrets</b>, nunca quedan escritas en las imágenes.
+    </p>
+
+    <footer>
+      <span>ismherna — 42 madrid</span>
+      <span>build: docker &amp; docker-compose · sin imágenes preconstruidas</span>
+    </footer>
+
+  </div>
 </body>
 </html>

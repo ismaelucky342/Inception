@@ -1,3 +1,4 @@
+#!/bin/sh
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
@@ -10,11 +11,13 @@
 #                                                                              #
 # **************************************************************************** #
 
-#!/bin/sh
+# ── Fijar contraseña del usuario FTP desde el secret (nunca en la imagen) ──
+FTP_PASSWORD=$(cat /run/secrets/ftp_password)
+echo "ftpuser:${FTP_PASSWORD}" | chpasswd
 
 # Asegurar permisos correctos
 chown -R ftpuser:ftpuser /var/www/html
 chmod -R 755 /var/www/html
 
-# Iniciar vsftpd
-/usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+# Iniciar vsftpd en foreground como PID 1 (propaga señales de docker stop)
+exec /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf

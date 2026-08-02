@@ -15,10 +15,9 @@ FROM alpine:3.18
 # Instalar vsftpd (FTP server)
 RUN apk add --no-cache vsftpd
 
-# Crear usuario FTP
+# Crear usuario FTP (sin contraseña: se fija en runtime desde el secret)
 RUN addgroup -g 1001 ftpuser && \
-    adduser -D -u 1001 -G ftpuser -h /var/www/html ftpuser && \
-    echo "ftpuser:Melman@20142010" | chpasswd
+    adduser -D -u 1001 -G ftpuser -h /var/www/html ftpuser
 
 # Configuración vsftpd
 RUN mkdir -p /etc/vsftpd && \
@@ -34,8 +33,6 @@ RUN mkdir -p /etc/vsftpd && \
     echo "connect_from_port_20=YES" >> /etc/vsftpd/vsftpd.conf && \
     echo "secure_chroot_dir=/var/run/vsftpd/empty" >> /etc/vsftpd/vsftpd.conf && \
     echo "pam_service_name=vsftpd" >> /etc/vsftpd/vsftpd.conf && \
-    echo "rsa_cert_file=/etc/ssl/certs/vsftpd.crt" >> /etc/vsftpd/vsftpd.conf && \
-    echo "rsa_private_key_file=/etc/ssl/private/vsftpd.key" >> /etc/vsftpd/vsftpd.conf && \
     echo "ssl_enable=NO" >> /etc/vsftpd/vsftpd.conf && \
     echo "pasv_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
     echo "pasv_min_port=10000" >> /etc/vsftpd/vsftpd.conf && \
