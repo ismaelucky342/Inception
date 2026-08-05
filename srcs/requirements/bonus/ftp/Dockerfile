@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-FROM alpine:3.18
+FROM alpine:3.23
 
 # Instalar vsftpd (FTP server)
 RUN apk add --no-cache vsftpd

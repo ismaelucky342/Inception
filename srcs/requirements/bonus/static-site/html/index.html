@@ -172,6 +172,15 @@
   a.link:hover{color:var(--amber-glow); border-color:var(--amber-glow);}
   a.link:focus-visible{outline:2px solid var(--amber); outline-offset:3px;}
 
+  .cmd{
+    color:var(--muted);
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    padding:2px 6px;
+    font-size:12px;
+    cursor:help;
+  }
+
   .here{color:var(--ok);}
 
   /* ── Nota de arquitectura ─────────────────────────── */
@@ -268,7 +277,7 @@
             <td class="svc-name">ftp</td>
             <td class="svc-role">Acceso por FTP al volumen de WordPress.<small>modo pasivo 10000–10100</small></td>
             <td class="svc-port">:21</td>
-            <td><a class="link" href="ftp://${DOMAIN_NAME}">Conectar</a></td>
+            <td><code class="cmd" title="Los navegadores modernos ya no soportan ftp://, usa un cliente FTP">ftp ${DOMAIN_NAME}</code></td>
           </tr>
           <tr>
             <td class="svc-id">06</td>

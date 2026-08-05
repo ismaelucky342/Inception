@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-FROM alpine:3.18
+FROM alpine:3.23
 
 # Instalar nginx + gettext (envsubst, para inyectar DOMAIN_NAME en runtime)
 RUN apk add --no-cache nginx gettext

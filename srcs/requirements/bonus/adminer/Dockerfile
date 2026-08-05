@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-FROM alpine:3.18
+FROM alpine:3.23
 
 # Instalar NGINX, PHP y dependencias
 RUN apk add --no-cache \

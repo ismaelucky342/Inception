@@ -18,11 +18,11 @@ all: up
 
 up:
 	@echo "--- Starting all services ---"
-	docker-compose -f $(COMPOSE_FILE) up -d --build
+	docker compose -f $(COMPOSE_FILE) up -d --build
 
 down:
 	@echo "--- Stopping all services (keeping volumes) ---"
-	docker-compose -f $(COMPOSE_FILE) down --remove-orphans
+	docker compose -f $(COMPOSE_FILE) down --remove-orphans
 
 clean: down
 	@echo "--- Removing project images ---"
@@ -32,7 +32,7 @@ clean: down
 
 fclean: clean
 	@echo "--- Full clean: volumes, network, dangling images and builder cache ---"
-	@docker-compose -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans 2>/dev/null || true
+	@docker compose -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans 2>/dev/null || true
 	@for vol in $(VOLUMES); do \
 		docker volume rm $$vol 2>/dev/null || true; \
 	done
@@ -43,10 +43,10 @@ fclean: clean
 re: fclean up
 
 logs:
-	docker-compose -f $(COMPOSE_FILE) logs -f
+	docker compose -f $(COMPOSE_FILE) logs -f
 
 bonus:
 	@echo "--- Bonus services status ---"
-	@docker-compose -f $(COMPOSE_FILE) ps | grep -E 'redis|ftp|grafana|prometheus|adminer|static-site' || echo "Bonus services not running"
+	@docker compose -f $(COMPOSE_FILE) ps | grep -E 'redis|ftp|grafana|prometheus|adminer|static-site' || echo "Bonus services not running"
 
 .PHONY: all up down clean fclean re logs bonus

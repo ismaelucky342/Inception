@@ -1,9 +1,11 @@
+*This project has been created as part of the 42 curriculum by ismherna.*
+
 # Inception
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3d4d4c9c-4602-4250-8721-80c2c64e0080" width="300">
 </p>
 
-## Project Overview
+## Description
 
 **Inception** is a DevOps project that consists of building a fully functional web infrastructure using **Docker** and **Docker Compose**, without relying on pre-built images (except Alpine or Debian). The goal is to create a secure, modular, and maintainable architecture that runs inside containers, following strict rules and best practices regarding service separation, data persistence, security, and automation.
 
@@ -41,7 +43,7 @@ The infrastructure is composed of the following services, each containerized and
 
 ---
 
-## How to Use
+## Instructions
 
 ### 1. Prerequisites
 
@@ -85,18 +87,24 @@ Stops all services and removes containers, volumes, and networks.
 ```
 .
 ├── Makefile
-├── .env
-├── secrets/          # Stores credentials (ignored by Git)
-├── srcs/
-│   ├── requirements/
-│   │   ├── nginx/
-│   │   ├── wordpress/
-│   │   ├── mariadb/
-│   │   ├── adminer/
-│   │   ├── redis/     # Bonus
-│   │   ├── ftp/       # Bonus
-│   │   └── static/    # Bonus
-│   └── docker-compose.yml
+├── README.md
+├── USER_DOC.md
+├── DEV_DOC.md
+├── secrets/              # Stores credentials (ignored by Git, created locally before `make`)
+└── srcs/
+    ├── .env              # non-secret config, tracked by Git
+    ├── docker-compose.yml
+    └── requirements/
+        ├── nginx/
+        ├── wordpress/
+        ├── mariadb/
+        └── bonus/
+            ├── redis/
+            ├── ftp/
+            ├── prometheus/
+            ├── grafana/
+            ├── adminer/
+            └── static-site/
 ```
 
 ---
@@ -111,6 +119,27 @@ Stops all services and removes containers, volumes, and networks.
 - [ ]  Bonus services are functional (Redis, FTP, Static Site).
 - [ ]  `.env` is respected and used.
 - [ ]  `make` and `make down` work as expected.
+
+---
+
+## Resources
+
+- [`USER_DOC.md`](./USER_DOC.md) — end-user / admin guide (start/stop the stack, access WordPress and the admin panel, manage credentials, basic checks).
+- [`DEV_DOC.md`](./DEV_DOC.md) — developer guide (prerequisites, setup, Makefile usage, docker compose commands, data persistence).
+- [Docker documentation](https://docs.docker.com/)
+- [Docker Compose documentation](https://docs.docker.com/compose/)
+- [WordPress + WP-CLI documentation](https://developer.wordpress.org/cli/commands/)
+- [Alpine Linux packages](https://pkgs.alpinelinux.org/packages)
+
+### How AI was used
+
+<!-- TODO(ismherna): personaliza este párrafo con lo que realmente hiciste, es lo que te van a preguntar en la defensa. -->
+AI tools (Claude) were used during this project as a support resource, mainly for:
+- Debugging specific errors in Dockerfiles, `docker-compose.yml` and shell init scripts (e.g. interpreting error messages, suggesting fixes to test).
+- Reviewing configuration files (NGINX, PHP-FPM, vsftpd) against best practices before applying changes manually.
+- Drafting and formatting this documentation (README, USER_DOC.md, DEV_DOC.md) from notes taken while building the project.
+
+All architecture decisions, the Dockerfiles, the docker-compose configuration and the service integration were designed, written and tested manually by the author. AI suggestions were reviewed, understood and adapted rather than copy-pasted directly, in line with the 42 policy on AI usage.
 
 ---
 

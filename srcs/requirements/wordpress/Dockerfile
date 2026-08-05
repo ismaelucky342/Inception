@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-FROM alpine:3.18
+FROM alpine:3.23
 
 # php83: intérprete base
 # php83-fpm: gestor de procesos FastCGI (lo que requiere el subject)
