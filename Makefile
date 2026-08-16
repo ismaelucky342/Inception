@@ -3,8 +3,11 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ismherna <ismherna@student.42madrid.com    +#+  +:+       +#+         #
+#    By: ismherna <ismherna@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2026/08/16 20:09:18 by ismherna          #+#    #+#              #
+#    Updated: 2026/08/16 20:09:20 by ismherna         ###   ########.fr        #
+#                                                                              #
 # **************************************************************************** #
 
 COMPOSE_FILE = srcs/docker-compose.yml
@@ -14,9 +17,19 @@ IMAGES  = inception_mariadb inception_wordpress inception_nginx inception_redis 
           inception_ftp inception_prometheus inception_grafana inception_adminer \
           inception_static_site
 
+DATA_DIR = /home/ismherna/data
+
 all: up
 
-up:
+init_dirs:
+	@echo "--- Creating volume directories ---"
+	@mkdir -p $(DATA_DIR)/db_data
+	@mkdir -p $(DATA_DIR)/wp_data
+	@mkdir -p $(DATA_DIR)/redis_data
+	@mkdir -p $(DATA_DIR)/prometheus_data
+	@mkdir -p $(DATA_DIR)/grafana_data
+
+up: init_dirs
 	@echo "--- Starting all services ---"
 	docker compose -f $(COMPOSE_FILE) up -d --build
 
@@ -49,4 +62,4 @@ bonus:
 	@echo "--- Bonus services status ---"
 	@docker compose -f $(COMPOSE_FILE) ps | grep -E 'redis|ftp|grafana|prometheus|adminer|static-site' || echo "Bonus services not running"
 
-.PHONY: all up down clean fclean re logs bonus
+.PHONY: all init_dirs up down clean fclean re logs bonus
