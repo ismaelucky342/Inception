@@ -33,7 +33,7 @@ services:
   mariadb:
     build: ./requirements/mariadb
     container_name: mariadb
-    image: inception_mariadb
+    image: mariadb
     restart: on-failure
     env_file: .env
     secrets:
@@ -50,7 +50,7 @@ services:
   wordpress:
     build: ./requirements/wordpress
     container_name: wordpress
-    image: inception_wordpress
+    image: wordpress
     restart: on-failure
     env_file: .env
     depends_on:
@@ -70,7 +70,7 @@ services:
   nginx:
     build: ./requirements/nginx
     container_name: nginx
-    image: inception_nginx
+    image: nginx
     restart: on-failure
     env_file: .env
     depends_on:
@@ -88,7 +88,7 @@ services:
   redis:
     build: ./requirements/bonus/redis
     container_name: redis
-    image: inception_redis
+    image: redis
     restart: on-failure
     volumes:
       - redis_data:/var/lib/redis
@@ -101,7 +101,7 @@ services:
   ftp:
     build: ./requirements/bonus/ftp
     container_name: ftp
-    image: inception_ftp
+    image: ftp
     restart: on-failure
     depends_on:
       - wordpress
@@ -120,7 +120,7 @@ services:
   prometheus:
     build: ./requirements/bonus/prometheus
     container_name: prometheus
-    image: inception_prometheus
+    image: prometheus
     restart: on-failure
     volumes:
       - prometheus_data:/var/lib/prometheus
@@ -133,7 +133,7 @@ services:
   grafana:
     build: ./requirements/bonus/grafana
     container_name: grafana
-    image: inception_grafana
+    image: grafana
     restart: on-failure
     environment:
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -150,7 +150,7 @@ services:
   adminer:
     build: ./requirements/bonus/adminer
     container_name: adminer
-    image: inception_adminer
+    image: adminer
     restart: on-failure
     depends_on:
       - mariadb
@@ -163,7 +163,7 @@ services:
   static-site:
     build: ./requirements/bonus/static-site
     container_name: static-site
-    image: inception_static_site
+    image: static-site
     restart: on-failure
     env_file: .env
     networks:
@@ -175,18 +175,34 @@ services:
 volumes:
   db_data:
     driver: local
-
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ismherna/data/db_data
   wp_data:
     driver: local
-
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ismherna/data/wp_data
   redis_data:
     driver: local
-
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ismherna/data/redis_data
   prometheus_data:
     driver: local
-
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ismherna/data/prometheus_data
   grafana_data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/ismherna/data/grafana_data
 
 # ── Red interna ──────────────────────────────────────────
 networks:
