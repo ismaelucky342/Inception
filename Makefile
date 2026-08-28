@@ -3,21 +3,22 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ismherna <ismherna@student.42.fr>          +#+  +:+       +#+         #
+#    By: ismherna <ismherna@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/08/16 20:09:18 by ismherna          #+#    #+#              #
-#    Updated: 2026/08/16 20:09:20 by ismherna         ###   ########.fr        #
+#    Updated: 2026/08/28 17:05:38 by ismherna         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-COMPOSE_FILE = srcs/docker-compose.yml
+COMPOSE_FILE           = srcs/docker-compose.yml
 COMPOSE_PARALLEL_LIMIT = 1
-VOLUMES = db_data wp_data redis_data prometheus_data grafana_data
-IMAGES  = inception_mariadb inception_wordpress inception_nginx inception_redis \
-          inception_ftp inception_prometheus inception_grafana inception_adminer \
-          inception_static_site
+VOLUMES                = db_data wp_data redis_data prometheus_data grafana_data
+IMAGES                 = inception_mariadb inception_wordpress inception_nginx inception_redis \
+                         inception_ftp inception_prometheus inception_grafana inception_adminer \
+                         inception_static_site
 
-DATA_DIR = /home/ismherna/data
+# Ruta fija requerida para el login de 42
+DATA_DIR               = /home/ismherna/data
 
 all: up
 
@@ -28,6 +29,7 @@ init_dirs:
 	@mkdir -p $(DATA_DIR)/redis_data
 	@mkdir -p $(DATA_DIR)/prometheus_data
 	@mkdir -p $(DATA_DIR)/grafana_data
+	@chmod -R 777 $(DATA_DIR) 2>/dev/null || true
 
 up: init_dirs
 	@echo "--- Starting all services ---"
@@ -51,6 +53,7 @@ fclean: clean
 	done
 	@docker network rm inception 2>/dev/null || true
 	@docker builder prune -f
+	@sudo rm -rf $(DATA_DIR) 2>/dev/null || true
 	@echo "Cleanup complete."
 
 re: fclean up

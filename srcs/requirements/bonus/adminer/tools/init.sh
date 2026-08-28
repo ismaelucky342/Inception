@@ -11,8 +11,12 @@
 #                                                                              #
 # **************************************************************************** #
 
-# Iniciar PHP-FPM en segundo plano (proceso de soporte)
+#!/bin/sh
+
+mkdir -p /run/nginx
+
+# Iniciar PHP-FPM
 php-fpm -D
 
-# NGINX queda como proceso principal (PID 1) en foreground
-exec nginx -g "daemon off;"
+# Iniciar NGINX en primer plano
+nginx -g "daemon off;"
