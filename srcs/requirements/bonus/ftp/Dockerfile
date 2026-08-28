@@ -37,7 +37,10 @@ RUN mkdir -p /etc/vsftpd && \
     echo "pasv_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
     echo "pasv_min_port=10000" >> /etc/vsftpd/vsftpd.conf && \
     echo "pasv_max_port=10100" >> /etc/vsftpd/vsftpd.conf && \
-    mkdir -p /var/run/vsftpd/empty
+    echo "seccomp_sandbox=NO" >> /etc/vsftpd/vsftpd.conf && \
+    mkdir -p /var/run/vsftpd/empty && \
+    mkdir -p /etc/pam.d && \
+    printf 'auth required pam_unix.so nullok\naccount required pam_unix.so\n' > /etc/pam.d/vsftpd
 
 # Permisos del directorio WordPress
 RUN mkdir -p /var/www/html && \
