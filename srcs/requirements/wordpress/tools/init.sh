@@ -22,6 +22,9 @@ WP_ADMIN_USER=$(cat /run/secrets/credentials | head -1)
 WP_ADMIN_PASSWORD=$(cat /run/secrets/credentials | tail -1)
 WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password)
 
+# ── Fijar límite de memoria para wp-cli (evita "Allowed memory size exhausted") ──
+export WP_CLI_PHP_ARGS="-d memory_limit=512M"
+
 # ── 1. Descargar WordPress si no está instalado ──────────
 if [ ! -f "${WP_PATH}/wp-login.php" ]; then
     echo "[wp] Descargando WordPress..."
@@ -45,7 +48,8 @@ fi
 
 # ── 3. Esperar a que MariaDB esté lista ──────────────────
 echo "[wp] Esperando a MariaDB..."
-until wp db check --path="${WP_PATH}" --allow-root 2>/dev/null; do
+export MYSQL_USER MYSQL_PASSWORD MYSQL_DATABASE
+until php -r 'mysqli_report(MYSQLI_REPORT_OFF); $m=@new mysqli("mariadb", getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE")); exit($m->connect_errno ? 1 : 0);' 2>/dev/null; do
     sleep 2
 done
 echo "[wp] MariaDB lista."

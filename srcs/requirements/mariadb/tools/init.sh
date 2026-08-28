@@ -18,6 +18,9 @@
 MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 MYSQL_PASSWORD=$(cat /run/secrets/db_password)
 
+# Asegurar que existe el directorio del socket (/run es tmpfs, se vacía en cada reinicio)
+mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
+
 # 1. Inicializar el sistema de tablas solo si es la primera vez
 if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "[init] Primera ejecución: inicializando base de datos..."
@@ -42,15 +45,14 @@ echo "[init] MariaDB lista."
 #    el contenedor en bucle de reinicio. Se guarda un flag para no repetirlo.
 if [ ! -f "/var/lib/mysql/.initialized" ]; then
     mysql -u root << EOF
-UPDATE mysql.user
-    SET authentication_string = PASSWORD('${MYSQL_ROOT_PASSWORD}'),
-        plugin = 'mysql_native_password'
-    WHERE User = 'root' AND Host = 'localhost';
+-- Cambiar contraseña de root (sintaxis MariaDB 11.x)
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 
+-- Eliminar usuarios/BD por defecto
 DELETE FROM mysql.user WHERE User = '';
-
 DROP DATABASE IF EXISTS test;
 
+-- Crear la base de datos y el usuario de WordPress
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
 
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%'

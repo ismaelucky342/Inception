@@ -17,8 +17,8 @@ IMAGES                 = inception_mariadb inception_wordpress inception_nginx i
                          inception_ftp inception_prometheus inception_grafana inception_adminer \
                          inception_static_site
 
-# Ruta fija requerida para el login de 42
-DATA_DIR               = /home/ismherna/data
+# Ruta base de datos (debe coincidir con docker-compose.yml)
+DATA_DIR               = /home/nirmata/data
 
 all: up
 

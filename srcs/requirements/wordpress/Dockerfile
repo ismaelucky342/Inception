@@ -36,14 +36,22 @@ RUN apk add --no-cache \
     wget \
     unzip
 
+# Crear el usuario www-data que php-fpm y el init.sh esperan
+RUN getent group www-data >/dev/null || addgroup -S www-data; \
+    getent passwd www-data >/dev/null || adduser -S -D www-data
+
 # wp-cli: herramienta oficial para configurar WordPress por línea de comandos
 # Imprescindible para instalar WP sin interfaz web (y sin hardcodear nada)
 RUN wget -q https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp
 
-# Configuración de php-fpm
-COPY conf/www.conf /etc/php/php-fpm.d/www.conf
+# Aumentar límite de memoria PHP (necesario para wp-cli al extraer WordPress)
+RUN sed -i 's/^memory_limit.*/memory_limit = 512M/' /etc/php*/php.ini 2>/dev/null || \
+    echo "memory_limit = 512M" >> /etc/php*/php.ini
+
+# Configuración de php-fpm (ruta de Alpine 3.23: /etc/php84/php-fpm.d/)
+COPY conf/www.conf /etc/php84/php-fpm.d/www.conf
 
 # Script de inicialización
 COPY tools/init.sh /usr/local/bin/init.sh
@@ -57,4 +65,4 @@ WORKDIR /var/www/html
 EXPOSE 9000
 
 ENTRYPOINT ["/usr/local/bin/init.sh"]
-CMD ["/usr/sbin/php-fpm83", "-F"]
+CMD ["/usr/sbin/php-fpm84", "-F"]
