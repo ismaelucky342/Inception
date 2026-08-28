@@ -18,7 +18,7 @@ IMAGES                 = inception_mariadb inception_wordpress inception_nginx i
                          inception_static_site
 
 # Ruta base de datos (debe coincidir con docker-compose.yml)
-DATA_DIR               = /home/nirmata/data
+DATA_DIR               = /home/ismherna/data
 
 all: up
 

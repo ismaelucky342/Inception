@@ -178,31 +178,31 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/nirmata/data/db_data  # <-- Cambiado a nirmata
+      device: /home/ismherna/data/db_data  # <-- Cambiado a nirmata
   wp_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nirmata/data/wp_data  # <-- Cambiado a nirmata
+      device: /home/ismherna/data/wp_data  # <-- Cambiado a nirmata
   redis_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nirmata/data/redis_data
+      device: /home/ismherna/data/redis_data
   prometheus_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nirmata/data/prometheus_data
+      device: /home/ismherna/data/prometheus_data
   grafana_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/nirmata/data/grafana_data
+      device: /home/ismherna/data/grafana_data
 
 # ── Red interna ──────────────────────────────────────────
 networks:
