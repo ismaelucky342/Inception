@@ -34,7 +34,15 @@ if [ ! -f "${WP_PATH}/wp-login.php" ]; then
         --allow-root
 fi
 
-# ── 2. Crear wp-config.php si no existe ─────────────────
+# ── 2. Esperar a que MariaDB esté lista ──────────────────
+echo "[wp] Esperando a MariaDB..."
+export MYSQL_USER MYSQL_PASSWORD MYSQL_DATABASE
+until php -r 'mysqli_report(MYSQLI_REPORT_OFF); $m=@new mysqli("mariadb", getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE")); exit($m->connect_errno ? 1 : 0);' 2>/dev/null; do
+    sleep 2
+done
+echo "[wp] MariaDB lista."
+
+# ── 3. Crear wp-config.php si no existe ─────────────────
 if [ ! -f "${WP_PATH}/wp-config.php" ]; then
     echo "[wp] Creando wp-config.php..."
     wp config create \
@@ -45,14 +53,6 @@ if [ ! -f "${WP_PATH}/wp-config.php" ]; then
         --dbhost="mariadb:3306" \
         --allow-root
 fi
-
-# ── 3. Esperar a que MariaDB esté lista ──────────────────
-echo "[wp] Esperando a MariaDB..."
-export MYSQL_USER MYSQL_PASSWORD MYSQL_DATABASE
-until php -r 'mysqli_report(MYSQLI_REPORT_OFF); $m=@new mysqli("mariadb", getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE")); exit($m->connect_errno ? 1 : 0);' 2>/dev/null; do
-    sleep 2
-done
-echo "[wp] MariaDB lista."
 
 # ── 4. Instalar WordPress si no está instalado ───────────
 if ! wp core is-installed --path="${WP_PATH}" --allow-root 2>/dev/null; then
