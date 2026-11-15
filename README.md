@@ -1,6 +1,9 @@
+<img width="1967" height="316" alt="image" src="https://github.com/user-attachments/assets/d4eb41ad-6a43-40cc-8682-4e1c624f4e62" />
+
 *This project has been created as part of the 42 curriculum by ismherna.*
 
 # Inception
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3d4d4c9c-4602-4250-8721-80c2c64e0080" width="300">
 </p>
